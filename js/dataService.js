@@ -91,9 +91,49 @@ class DataService {
   }
 
   /**
+   * 标准化后端数据结构，支持后端返回的字段规范：
+   * - storeId: 12
+   * - storeName: "测试店铺1"
+   * - storeType: "1" (1: 品牌站, 2: 泛欧站)
+   * - markets: [{ marketId: 22, marketName: "市场1", orderCount: 1, orderAmount: 32323 }]
+   */
+  normalizeBackendData(data) {
+    if (!Array.isArray(data)) return [];
+    return data.map(store => {
+      const isBrand = String(store.storeType || store.type) === '1' || store.type === 'brand';
+      const type = isBrand ? 'brand' : 'pan_eu';
+      const category = isBrand ? '品牌站' : '泛欧站';
+
+      const markets = (store.markets || []).map(m => {
+        const sales = Number(m.orderAmount !== undefined ? m.orderAmount : (m.sales || 0));
+        const orders = Number(m.orderCount !== undefined ? m.orderCount : (m.orders || 0));
+        const traffic = Number(m.trafficCount || m.visitorCount || m.traffic || (orders > 0 ? orders * 18 : 100));
+
+        return {
+          marketId: m.marketId,
+          marketName: m.marketName || m.country || 'Unknown',
+          sales,
+          orders,
+          traffic
+        };
+      });
+
+      return {
+        storeId: String(store.storeId || store.storeName),
+        storeName: store.storeName,
+        storeType: store.storeType || (isBrand ? '1' : '2'),
+        type,
+        category,
+        markets
+      };
+    });
+  }
+
+  /**
    * 前端核心计算引擎 (按照用户要求：总销售额和店铺总额由前端自动计算)
    */
   calculateAggregates(rawStores) {
+    const normalizedStores = this.normalizeBackendData(rawStores);
     let amsTotalSales = 0;
     let amsTotalOrders = 0;
     let amsTotalTraffic = 0;
@@ -103,7 +143,7 @@ class DataService {
     let panEuTotalSales = 0;
     let panEuTotalOrders = 0;
 
-    const computedStores = rawStores.map(store => {
+    const computedStores = normalizedStores.map(store => {
       let storeSales = 0;
       let storeOrders = 0;
       let storeTraffic = 0;
