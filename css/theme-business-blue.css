@@ -157,6 +157,41 @@ html, body {
   100% { transform: scale(0.95); opacity: 0.8; }
 }
 
+/* 中英文语言切换胶囊条 */
+.lang-switcher-capsule {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  padding: 3px 6px;
+  background: rgba(15, 30, 75, 0.7);
+  border: 1px solid rgba(59, 130, 246, 0.35);
+  border-radius: 20px;
+}
+
+.lang-pill-btn {
+  padding: 3px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #94a3b8;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.lang-pill-btn:hover {
+  color: #ffffff;
+  background: rgba(59, 130, 246, 0.2);
+}
+
+.lang-pill-btn.active {
+  color: #ffffff;
+  background: #2563eb;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.4);
+}
+
 /* 版本切换胶囊条 */
 .theme-switcher-capsule {
   display: flex;

@@ -15,6 +15,15 @@ class DashboardController {
   }
 
   init() {
+    if (window.i18n) {
+      window.i18n.init();
+      window.i18n.onLanguageChange(() => {
+        if (this.currentData) {
+          this.handleDataUpdate(this.currentData);
+        }
+      });
+    }
+
     this.startClock();
 
     if (window.dashboardCharts) {
@@ -35,7 +44,8 @@ class DashboardController {
       const now = new Date();
       const pad = n => String(n).padStart(2, '0');
       const timeStr = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
-      if (clockEl) clockEl.innerText = `Updated ${timeStr}`;
+      const prefix = window.i18n ? window.i18n.t('updatedPrefix', 'Updated') : 'Updated';
+      if (clockEl) clockEl.innerText = `${prefix} ${timeStr}`;
     };
     update();
     setInterval(update, 1000);
@@ -146,14 +156,31 @@ class DashboardController {
    * 3. 四大店铺营收卡片 (Orders by storefront)
    */
   renderStorefrontCards(data) {
+    const t = k => (window.i18n ? window.i18n.t(k) : k);
     data.stores.forEach(store => {
       const card = document.querySelector(`.storefront-card[data-store-id="${store.storeId}"]`);
       if (!card) return;
+
+      // 类型标签 (品牌站 / 泛欧站)
+      const typeBadge = card.querySelector('.store-type-badge');
+      if (typeBadge) {
+        typeBadge.innerText = store.type === 'brand' ? t('tagBrand') : t('tagPanEu');
+      }
+
+      // 在线状态
+      const statusOnline = card.querySelector('.store-status-online');
+      if (statusOnline) {
+        statusOnline.innerText = t('onlineStatus');
+      }
 
       // 订单数量
       const ordersEl = card.querySelector('.card-orders-num');
       if (ordersEl) {
         ordersEl.innerText = store.storeOrders.toLocaleString('en-US');
+      }
+      const ordersUnitLabel = card.querySelector('.orders-unit-label');
+      if (ordersUnitLabel) {
+        ordersUnitLabel.innerText = t('ordersUnit');
       }
 
       // 营收 (USD)
@@ -161,11 +188,16 @@ class DashboardController {
       if (revEl) {
         revEl.innerText = `$${store.storeSales.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USD`;
       }
+      const revTinyLabel = card.querySelector('.revenue-tiny-label');
+      if (revTinyLabel) {
+        revTinyLabel.innerText = t('revenueUnit');
+      }
 
       // 市场数量与市场标签预览
       const marketsCountEl = card.querySelector('.card-markets-count');
       if (marketsCountEl) {
-        marketsCountEl.innerText = `${store.marketCount} ${store.marketCount === 1 ? 'market' : 'markets'}`;
+        const sfx = store.marketCount === 1 ? t('marketSuffixSingle') : t('marketsSuffix');
+        marketsCountEl.innerText = `${store.marketCount} ${sfx}`;
       }
 
       const marketListEl = card.querySelector('.card-markets-chips');
@@ -182,6 +214,7 @@ class DashboardController {
   renderIntelligenceTable(data, businessLine = 'all') {
     const tableBody = document.getElementById('intelligenceTableBody');
     if (!tableBody) return;
+    const t = k => (window.i18n ? window.i18n.t(k) : k);
 
     // 收集展示行（可展示各店铺，或展开到各店铺的市场明细）
     let rows = [];
@@ -198,7 +231,7 @@ class DashboardController {
       rows.push({
         isStoreSummary: true,
         storeName: store.storeName,
-        category: store.category,
+        category: store.type === 'brand' ? t('tagBrand') : t('tagPanEu'),
         type: store.type,
         sales: store.storeSales,
         sharePercent: store.sharePercent,
@@ -234,7 +267,7 @@ class DashboardController {
               <div class="store-badge-cell">
                 <span class="type-tag ${typeBadgeClass}">${item.category}</span>
                 <span class="store-title-text">${item.storeName}</span>
-                <span class="market-sub-count">(${item.marketCount} markets)</span>
+                <span class="market-sub-count">(${item.marketCount} ${t('marketsSuffix')})</span>
               </div>
             </td>
             <td class="col-sales">
@@ -265,7 +298,7 @@ class DashboardController {
           <tr class="table-row-market-detail">
             <td class="col-name indent-cell">
               <span class="market-country-flag">${item.marketName}</span>
-              <span class="market-detail-name">${item.storeName} - ${item.marketName} 市场</span>
+              <span class="market-detail-name">${item.storeName} - ${item.marketName} ${t('marketText')}</span>
             </td>
             <td class="col-sales">
               <span class="sales-val-sub">$${item.sales.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>

@@ -150,6 +150,42 @@ html, body {
   animation: pulse-ring 2s infinite;
 }
 
+/* 中英文语言切换胶囊条 */
+.lang-switcher-capsule {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  padding: 3px 6px;
+  background: rgba(4, 14, 38, 0.7);
+  border: 1px solid rgba(0, 240, 255, 0.35);
+  border-radius: 20px;
+}
+
+.lang-pill-btn {
+  padding: 3px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #7fa4cb;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.lang-pill-btn:hover {
+  color: #ffffff;
+  background: rgba(0, 240, 255, 0.2);
+}
+
+.lang-pill-btn.active {
+  color: #04091e;
+  background: #00f0ff;
+  font-weight: 700;
+  box-shadow: 0 0 10px rgba(0, 240, 255, 0.5);
+}
+
 .theme-switcher-capsule {
   display: flex;
   align-items: center;

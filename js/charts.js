@@ -116,6 +116,14 @@ class DashboardCharts {
     if (dom2) this.horizontalRankChart = echarts.init(dom2);
 
     window.addEventListener('resize', () => this.resizeAll());
+
+    if (window.i18n) {
+      window.i18n.onLanguageChange(() => {
+        if (this.lastData) {
+          this.update(this.lastData, this.activeBusinessLine);
+        }
+      });
+    }
   }
 
   resizeAll() {
@@ -173,15 +181,17 @@ class DashboardCharts {
           const item = params[0];
           const st = data.stores.find(s => s.storeName === item.name);
           if (!st) return '';
+          const t = k => (window.i18n ? window.i18n.t(k) : k);
+          const catLabel = st.type === 'brand' ? t('tagBrand') : t('tagPanEu');
           return `
             <div style="font-weight:bold;margin-bottom:6px;color:${cfg.tooltipTitle};border-bottom:1px solid rgba(255,255,255,0.15);padding-bottom:4px;">
-              ${st.category ? `[${st.category}] ` : ''}${st.storeName}
+              [${catLabel}] ${st.storeName}
             </div>
-            <div style="margin:4px 0;">总营收: <b style="color:#ffffff;">$ ${Number(st.storeSales).toLocaleString()}</b></div>
-            <div style="margin:4px 0;">总订单: <b style="color:#93c5fd;">${st.storeOrders.toLocaleString()} 笔</b></div>
-            <div style="margin:4px 0;">市场数: <b>${st.marketCount} 个国家市场</b></div>
-            <div style="margin:4px 0;">平均客单价: <b>$ ${st.storeAov.toFixed(2)}</b></div>
-            <div style="margin:4px 0;">平均转化率: <b>${st.storeConversion.toFixed(2)}%</b></div>
+            <div style="margin:4px 0;">${t('chartTooltipRevenue')}: <b style="color:#ffffff;">$ ${Number(st.storeSales).toLocaleString()}</b></div>
+            <div style="margin:4px 0;">${t('chartTooltipOrders')}: <b style="color:#93c5fd;">${st.storeOrders.toLocaleString()} ${t('ordersCountText')}</b></div>
+            <div style="margin:4px 0;">${t('chartTooltipMarkets')}: <b>${st.marketCount} ${t('marketsSuffix')}</b></div>
+            <div style="margin:4px 0;">${t('chartTooltipAov')}: <b>$ ${st.storeAov.toFixed(2)}</b></div>
+            <div style="margin:4px 0;">${t('chartTooltipConv')}: <b>${st.storeConversion.toFixed(2)}%</b></div>
           `;
         }
       },
@@ -216,7 +226,7 @@ class DashboardCharts {
       },
       series: [
         {
-          name: '单店营收',
+          name: window.i18n ? window.i18n.t('chartSeriesRevenue') : '单店营收',
           type: 'bar',
           barWidth: 54,
           data: seriesData,
@@ -287,7 +297,8 @@ class DashboardCharts {
         textStyle: { color: '#fff', fontSize: 12 },
         formatter: params => {
           const item = params[0];
-          return `<b>${item.name}</b><br/>总营收: <b style="color:#fbbf24;">$ ${Number(item.value).toLocaleString()}</b>`;
+          const tRev = window.i18n ? window.i18n.t('chartTooltipRevenue') : '总营收';
+          return `<b>${item.name}</b><br/>${tRev}: <b style="color:#fbbf24;">$ ${Number(item.value).toLocaleString()}</b>`;
         }
       },
       grid: { top: 15, left: 110, right: 90, bottom: 20 },
