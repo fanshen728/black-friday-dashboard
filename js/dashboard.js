@@ -80,6 +80,15 @@ class DashboardController {
         }
       });
     });
+    // 里程碑突破 3D 烟花粒子特效演示按钮
+    const demoBtn = document.getElementById('milestoneDemoBtn');
+    if (demoBtn) {
+      demoBtn.addEventListener('click', () => {
+        if (window.triggerMilestoneFx) {
+          window.triggerMilestoneFx();
+        }
+      });
+    }
   }
 
   handleDataUpdate(data) {
@@ -102,6 +111,11 @@ class DashboardController {
 
     // 5. 底部业务线与市场情报表格
     this.renderIntelligenceTable(data, this.activeBusinessLine);
+
+    // 6. 里程碑门槛检测 (自动触发突破烟花粒子大招)
+    if (window.celebrationEngine) {
+      window.celebrationEngine.checkMilestones(data);
+    }
   }
 
   /**

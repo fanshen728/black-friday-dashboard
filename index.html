@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>AMS 销售看板 - 全球电商黑五作战指挥中心</title>
   <link rel="stylesheet" href="css/theme-business-blue.css?v=20261029_v3" />
+  <link rel="stylesheet" href="css/celebration.css?v=20261029_fx" />
 </head>
 <body>
   <div class="dashboard-screen">
@@ -42,6 +43,10 @@
           <a href="version-minimal-slate/index.html" class="theme-pill-btn" data-i18n="themePillSlate">⚡ 极简现代灰</a>
           <a href="version-cyberpunk/index.html" class="theme-pill-btn" data-i18n="themePillCyber">🌌 赛博朋克</a>
         </div>
+
+        <button id="milestoneDemoBtn" class="milestone-trigger-btn" onclick="window.triggerMilestoneFx && window.triggerMilestoneFx()" title="演示销量突破烟花粒子特效">
+          <span class="trigger-icon">🎉</span> <span data-i18n="milestoneFxBtn">突破特效</span>
+        </button>
 
         <button id="fullscreenToggleBtn" class="fullscreen-btn" title="全屏切换">
           <span>⛶</span> <span data-i18n="fullscreen">全屏</span>
@@ -295,6 +300,7 @@
 
   <!-- 引入依赖脚本 (本地离线可完美运行) -->
   <script src="lib/echarts.min.js"></script>
+  <script src="lib/three.min.js"></script>
   <script>
     window.ACTIVE_THEME = 'business-blue';
   </script>
@@ -302,6 +308,7 @@
   <script src="js/dataService.js"></script>
   <script src="js/globe.js"></script>
   <script src="js/charts.js"></script>
+  <script src="js/celebration.js"></script>
   <script src="js/dashboard.js"></script>
   <script>
     document.getElementById('fullscreenToggleBtn')?.addEventListener('click', () => {

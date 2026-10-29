@@ -1,0 +1,509 @@
+/**
+ * AMS 销售看板 - 里程碑销售额/订单突破 3D 烟花星系粒子特效样式 (升级豪华版)
+ * 特色：
+ * 1. 阶段化隆重入场：数字滚动加进来 -> 3D 空间翻转 -> 震撼浮现 "AMS 2026 总销量突破 xxx！"
+ * 2. 标志性 Aosom 2026 钻石/霓虹质感大字
+ * 3. 节日 Party Fairy Lights 挂灯串 (对齐参考图 1)
+ * 4. 5000 / 10000 / 实时数据 多档位主题一键切换
+ */
+
+/* ================= 1. 顶部 Header 突破特效触发按钮 ================= */
+.milestone-trigger-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 14px;
+  background: linear-gradient(135deg, rgba(236, 72, 153, 0.3), rgba(168, 85, 247, 0.35), rgba(245, 158, 11, 0.3));
+  border: 1px solid rgba(251, 191, 36, 0.7);
+  border-radius: 20px;
+  color: #fef08a;
+  font-family: var(--font-sans, system-ui, -apple-system, sans-serif);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 0 16px rgba(245, 158, 11, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  position: relative;
+  overflow: hidden;
+}
+
+.milestone-trigger-btn::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.35) 0%, transparent 60%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.milestone-trigger-btn:hover {
+  transform: translateY(-1px) scale(1.04);
+  background: linear-gradient(135deg, rgba(236, 72, 153, 0.45), rgba(168, 85, 247, 0.55), rgba(245, 158, 11, 0.5));
+  border-color: #fef08a;
+  color: #ffffff;
+  box-shadow: 0 0 24px rgba(245, 158, 11, 0.7), 0 0 35px rgba(236, 72, 153, 0.5);
+}
+
+.milestone-trigger-btn:hover::before {
+  opacity: 1;
+}
+
+.milestone-trigger-btn .trigger-icon {
+  font-size: 14px;
+  animation: trigger-bounce 1.5s infinite ease-in-out;
+  display: inline-block;
+}
+
+@keyframes trigger-bounce {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-2px) rotate(10deg); }
+}
+
+/* ================= 2. 全屏沉浸式特效蒙层 ================= */
+#milestoneCelebrationOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 999999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24px 36px;
+  background: radial-gradient(circle at center, rgba(16, 12, 38, 0.92) 0%, rgba(6, 6, 18, 0.97) 70%, #030308 100%);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+#milestoneCelebrationOverlay.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* 3D 粒子星系与烟花主画布 */
+#milestoneCelebrationCanvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* ================= 3. 节日彩灯串装饰 (对齐参考图 1 派对彩灯) ================= */
+.celebration-fairy-lights {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: 65px;
+  z-index: 8;
+  pointer-events: none;
+  display: flex;
+  justify-content: space-around;
+  padding: 0 40px;
+}
+
+.fairy-wire-svg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 45px;
+  stroke: rgba(255, 255, 255, 0.25);
+  stroke-width: 1.5;
+  fill: none;
+}
+
+.fairy-bulb {
+  position: relative;
+  width: 14px;
+  height: 22px;
+  border-radius: 50% 50% 45% 45%;
+  margin-top: 14px;
+  animation: bulb-flicker 2.5s infinite ease-in-out;
+  transform-origin: top center;
+}
+
+.fairy-bulb::before {
+  content: '';
+  position: absolute;
+  top: -4px;
+  left: 3px;
+  width: 8px;
+  height: 4px;
+  background: #475569;
+  border-radius: 2px;
+}
+
+.fairy-bulb.bulb-blue {
+  background: #38bdf8;
+  box-shadow: 0 0 16px #38bdf8, 0 0 30px #0284c7;
+  animation-delay: 0s;
+}
+
+.fairy-bulb.bulb-pink {
+  background: #f43f5e;
+  box-shadow: 0 0 16px #f43f5e, 0 0 30px #e11d48;
+  animation-delay: 0.6s;
+}
+
+.fairy-bulb.bulb-gold {
+  background: #fbbf24;
+  box-shadow: 0 0 16px #fbbf24, 0 0 30px #d97706;
+  animation-delay: 1.2s;
+}
+
+.fairy-bulb.bulb-cyan {
+  background: #2dd4bf;
+  box-shadow: 0 0 16px #2dd4bf, 0 0 30px #0d9488;
+  animation-delay: 1.8s;
+}
+
+@keyframes bulb-flicker {
+  0%, 100% { opacity: 0.9; transform: rotate(0deg) scale(1); }
+  30% { opacity: 1; transform: rotate(4deg) scale(1.08); filter: brightness(1.2); }
+  70% { opacity: 0.75; transform: rotate(-4deg) scale(0.96); }
+}
+
+/* ================= 4. 顶部战报横幅 (分阶段震撼浮现) ================= */
+.celebration-top-banner {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  opacity: 0;
+  transform: translateY(-35px) scale(0.92);
+  transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* 阶段 3: 文字震撼浮现状态 */
+#milestoneCelebrationOverlay.stage-revealed .celebration-top-banner {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+.celebration-badge-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 20px;
+  background: linear-gradient(90deg, rgba(168, 85, 247, 0.3), rgba(245, 158, 11, 0.35), rgba(236, 72, 153, 0.3));
+  border: 1px solid rgba(251, 191, 36, 0.7);
+  border-radius: 30px;
+  color: #fef08a;
+  font-family: var(--font-mono, monospace);
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  box-shadow: 0 0 24px rgba(245, 158, 11, 0.45);
+}
+
+.celebration-badge-pill .sparkle-icon {
+  animation: sparkle-spin 3s linear infinite;
+  display: inline-block;
+}
+
+@keyframes sparkle-spin {
+  0% { transform: rotate(0deg) scale(1); }
+  50% { transform: rotate(180deg) scale(1.25); }
+  100% { transform: rotate(360deg) scale(1); }
+}
+
+.celebration-main-title {
+  margin: 0;
+  font-size: 42px;
+  font-weight: 900;
+  letter-spacing: 2px;
+  background: linear-gradient(135deg, #ffffff 0%, #fef08a 25%, #f59e0b 55%, #ea580c 85%, #dc2626 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.8)) drop-shadow(0 0 35px rgba(245, 158, 11, 0.8));
+  text-align: center;
+  animation: title-glow-pulse 2.2s infinite ease-in-out;
+}
+
+@keyframes title-glow-pulse {
+  0%, 100% { filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.8)) drop-shadow(0 0 25px rgba(245, 158, 11, 0.7)); }
+  50% { filter: drop-shadow(0 2px 10px rgba(0, 0, 0, 0.9)) drop-shadow(0 0 45px rgba(245, 158, 11, 0.95)); }
+}
+
+.celebration-subtitle {
+  margin: 0;
+  font-size: 15px;
+  color: #cbd5e1;
+  letter-spacing: 1px;
+  text-align: center;
+  font-weight: 500;
+}
+
+/* ================= 5. 中部聚焦区：Aosom 2026 标志性字标 (对齐参考图 1 和图 2) ================= */
+.celebration-center-focus {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin: auto;
+  pointer-events: none;
+  min-height: 240px;
+}
+
+/* Aosom 2026 大字标 (沉底错开，不遮挡 3D 数字) */
+.celebration-brand-caption {
+  margin-top: 180px; /* 位于 3D 数字粒子下方，间距充裕绝不遮挡 */
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+  font-size: 48px;
+  font-weight: 900;
+  letter-spacing: 2.5px;
+  opacity: 0;
+  transform: translateY(20px) scale(0.9);
+  transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  text-align: center;
+}
+
+#milestoneCelebrationOverlay.stage-revealed .celebration-brand-caption {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+/* 5,000 档位：喜庆霓虹白粉微光 (参考图 1 风格) */
+.theme-5k .celebration-brand-caption {
+  color: #ffffff;
+  text-shadow: 0 0 20px rgba(255, 255, 255, 0.95), 0 0 35px #ec4899, 0 0 65px #a855f7, 0 4px 16px rgba(0, 0, 0, 0.9);
+}
+
+/* 10,000 档位：璀璨钻石水晶光芒 (参考图 2 风格) */
+.theme-10k .celebration-brand-caption {
+  background: linear-gradient(135deg, #ffffff 0%, #cbd5e1 25%, #ffffff 50%, #94a3b8 75%, #ffffff 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 0 25px rgba(255, 255, 255, 0.95)) drop-shadow(0 0 45px rgba(56, 189, 248, 0.6));
+  animation: diamond-shine 3s linear infinite;
+}
+
+@keyframes diamond-shine {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 200% 50%; }
+}
+
+/* ================= 6. 底部明细卡片与档位一键切换栏 ================= */
+.celebration-bottom-group {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  max-width: 980px;
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+#milestoneCelebrationOverlay.stage-revealed .celebration-bottom-group {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* 档位一键演示切换胶囊条 (5,000 / 10,000 / 实时最新) */
+.milestone-tier-switcher {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 6px;
+  background: rgba(15, 23, 42, 0.85);
+  border: 1px solid rgba(251, 191, 36, 0.4);
+  border-radius: 24px;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+}
+
+.tier-tab-btn {
+  padding: 6px 14px;
+  border-radius: 16px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #94a3b8;
+  background: transparent;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.tier-tab-btn:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.tier-tab-btn.active {
+  color: #ffffff;
+  background: linear-gradient(135deg, #2563eb, #3b82f6);
+  border-color: rgba(147, 197, 253, 0.5);
+  box-shadow: 0 2px 10px rgba(37, 99, 235, 0.45);
+}
+
+.tier-tab-btn.active.tier-gold {
+  background: linear-gradient(135deg, #d97706, #f59e0b);
+  border-color: #fef08a;
+  box-shadow: 0 2px 14px rgba(245, 158, 11, 0.55);
+}
+
+.tier-tab-btn.active.tier-diamond {
+  background: linear-gradient(135deg, #0284c7, #38bdf8);
+  border-color: #ffffff;
+  box-shadow: 0 2px 14px rgba(56, 189, 248, 0.55);
+}
+
+/* 战报快报数据条 */
+.celebration-metrics-board {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  width: 100%;
+  padding: 14px 18px;
+  background: rgba(15, 23, 42, 0.82);
+  border: 1px solid rgba(251, 191, 36, 0.35);
+  border-radius: 16px;
+  box-shadow: 0 15px 45px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+.celebration-metric-item {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 8px 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 10px;
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.celebration-metric-item:hover {
+  transform: translateY(-2px);
+  border-color: rgba(251, 191, 36, 0.5);
+  background: rgba(251, 191, 36, 0.06);
+}
+
+.celebration-metric-item .c-label {
+  font-size: 11px;
+  color: #94a3b8;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.celebration-metric-item .c-val {
+  font-size: 19px;
+  font-weight: 800;
+  font-family: var(--font-mono, monospace);
+  color: #ffffff;
+}
+
+.celebration-metric-item .c-val.highlight-gold {
+  color: #fbbf24;
+  text-shadow: 0 0 12px rgba(251, 191, 36, 0.4);
+}
+
+.celebration-metric-item .c-val.highlight-cyan {
+  color: #38bdf8;
+  text-shadow: 0 0 12px rgba(56, 189, 248, 0.4);
+}
+
+/* 控制按钮与提示栏 */
+.celebration-actions-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0 10px;
+}
+
+.celebration-hint-text {
+  font-size: 12px;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.celebration-hint-text kbd {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+  padding: 2px 6px;
+  font-family: var(--font-mono, monospace);
+  font-size: 11px;
+  color: #e2e8f0;
+}
+
+.celebration-btn-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.celebration-btn {
+  padding: 7px 18px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+}
+
+.celebration-btn-replay {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #e2e8f0;
+}
+
+.celebration-btn-replay:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+}
+
+.celebration-btn-close {
+  background: linear-gradient(135deg, #2563eb, #3b82f6);
+  color: #ffffff;
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.4);
+}
+
+.celebration-btn-close:hover {
+  background: linear-gradient(135deg, #1d4ed8, #2563eb);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(37, 99, 235, 0.6);
+}
+
+/* 响应式适配 */
+@media (max-width: 900px) {
+  .celebration-metrics-board {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .celebration-main-title {
+    font-size: 26px;
+  }
+  .celebration-brand-caption {
+    font-size: 32px;
+  }
+}
