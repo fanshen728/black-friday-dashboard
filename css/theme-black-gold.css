@@ -1,0 +1,677 @@
+@charset "utf-8";
+
+/* ==========================================================================
+   AMS 全球电商黑五销量大屏 - 黑五黑金尊贵版 (Luxury Black & Gold)
+   设计风格：黑五电商大促狂欢尊贵黑金、沉浸式大促破亿氛围、轻奢金属质感、高商业价值
+   ========================================================================== */
+
+:root {
+  --bg-dark-base: #0c0d11;
+  --bg-card: rgba(22, 22, 29, 0.78);
+  --bg-card-hover: rgba(32, 32, 42, 0.9);
+  --border-card: rgba(217, 119, 6, 0.32);
+  --border-card-hover: rgba(245, 158, 11, 0.7);
+  --border-glow: 0 4px 20px rgba(245, 158, 11, 0.15);
+  
+  --gold-primary: #f59e0b;
+  --gold-light: #fbbf24;
+  --gold-champagne: #fef3c7;
+  --accent-rose: #f43f5e;
+  --accent-emerald: #10b981;
+  --text-main: #fdfbf7;
+  --text-muted: #a3a3a3;
+  --text-dim: #737373;
+  --font-mono: 'DIN Alternate', 'SF Pro Display', 'Roboto Mono', Consolas, monospace;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  min-width: 1280px;
+  min-height: 720px;
+  overflow: hidden;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  background-color: var(--bg-dark-base);
+  color: var(--text-main);
+  user-select: none;
+}
+
+/* ================== 全局大屏背景 ================== */
+.dashboard-screen {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: url("../img/bg-black-gold.jpg?v=20261029") center top / cover no-repeat, #0c0d11;
+  overflow: hidden;
+}
+
+/* ================== 顶部 Header ================== */
+.dashboard-header {
+  position: relative;
+  height: 92px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  border-bottom: 1px solid rgba(217, 119, 6, 0.25);
+  background: linear-gradient(180deg, rgba(22, 22, 28, 0.94) 0%, rgba(14, 14, 18, 0.75) 100%);
+  z-index: 10;
+}
+
+.header-top-accent {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 520px;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, #d97706, #fbbf24, #fff, #fbbf24, #d97706, transparent);
+  box-shadow: 0 0 16px rgba(245, 158, 11, 0.6);
+}
+
+.header-left-zone {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-shrink: 0;
+  z-index: 12;
+}
+
+.globe-wrapper {
+  position: relative;
+  width: 72px;
+  height: 72px;
+  flex-shrink: 0;
+}
+
+#earthGlobeCanvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.tech-clock-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  background: rgba(45, 35, 20, 0.4);
+  border: 1px solid rgba(217, 119, 6, 0.4);
+  border-radius: 6px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: #fef08a;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  white-space: nowrap;
+}
+
+.tech-lines {
+  color: rgba(245, 158, 11, 0.7);
+  letter-spacing: -2px;
+  font-weight: bold;
+}
+
+/* 顶部中间：AMS 总销售额黑金舞台 */
+.header-center-zone {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  pointer-events: auto;
+}
+
+.ams-title-wrapper {
+  margin-bottom: 4px;
+}
+
+.ams-header-title {
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: 2.5px;
+  background: linear-gradient(180deg, #fff 0%, #fef08a 50%, #d97706 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 2px 10px rgba(245, 158, 11, 0.3);
+}
+
+.ams-counter-stage {
+  padding: 4px 20px;
+  background: linear-gradient(180deg, rgba(45, 35, 18, 0.6) 0%, rgba(20, 16, 10, 0.75) 100%);
+  border: 1px solid rgba(245, 158, 11, 0.45);
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 243, 199, 0.25), 0 0 14px rgba(245, 158, 11, 0.2);
+}
+
+.ams-flip-counter {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.digit-box {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 34px;
+  height: 44px;
+  background: linear-gradient(180deg, #2e2615 0%, #17130a 100%);
+  border: 1px solid rgba(245, 158, 11, 0.5);
+  border-radius: 5px;
+  color: #fffbeb;
+  font-family: var(--font-mono);
+  font-size: 30px;
+  font-weight: 800;
+  padding: 0 4px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+.digit-symbol {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  color: #fbbf24;
+  font-size: 26px;
+  font-weight: 800;
+  min-width: 18px;
+  margin-right: 2px;
+}
+
+.digit-comma {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  color: #d4af37;
+  font-size: 24px;
+  min-width: 10px;
+  align-self: flex-end;
+  margin-bottom: 2px;
+}
+
+.digit-separator-space {
+  width: 4px;
+}
+
+/* 顶部右侧控制区 (带全屏与版本切换) */
+.header-right-zone {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  z-index: 12;
+}
+
+.theme-switcher-capsule {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 6px;
+  background: rgba(30, 24, 15, 0.7);
+  border: 1px solid rgba(217, 119, 6, 0.4);
+  border-radius: 20px;
+}
+
+.theme-pill-btn {
+  padding: 4px 10px;
+  border-radius: 14px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #a3a3a3;
+  text-decoration: none;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.theme-pill-btn:hover {
+  color: #ffffff;
+  background: rgba(245, 158, 11, 0.2);
+}
+
+.theme-pill-btn.active {
+  color: #17130a;
+  background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%);
+  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.4);
+}
+
+.fullscreen-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  background: rgba(45, 35, 20, 0.4);
+  border: 1px solid rgba(217, 119, 6, 0.4);
+  border-radius: 6px;
+  color: #fef08a;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.fullscreen-btn:hover {
+  background: rgba(217, 119, 6, 0.35);
+  color: #fff;
+  border-color: #fbbf24;
+}
+
+/* ================== 主体布局 ================== */
+.dashboard-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 12px 18px 14px 18px;
+  gap: 12px;
+  overflow: hidden;
+}
+
+/* 四大店铺 KPI 横向卡片组 */
+.stores-kpi-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  height: 104px;
+  flex-shrink: 0;
+}
+
+.store-kpi-card {
+  position: relative;
+  background: var(--bg-card);
+  border: 1px solid var(--border-card);
+  border-radius: 8px;
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  overflow: hidden;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+}
+
+.store-kpi-card:hover {
+  background: var(--bg-card-hover);
+  border-color: var(--border-card-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(245, 158, 11, 0.25);
+}
+
+.store-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.store-brand-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.brand-status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.store-name-text {
+  font-size: 15px;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.store-category-tag {
+  font-size: 11px;
+  color: #d4af37;
+  background: rgba(217, 119, 6, 0.15);
+  border: 1px solid rgba(217, 119, 6, 0.3);
+  padding: 2px 7px;
+  border-radius: 4px;
+}
+
+.store-share-percent {
+  font-size: 12px;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+}
+
+.store-share-val {
+  color: #fbbf24;
+  font-weight: 700;
+}
+
+.store-card-body {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+}
+
+.store-currency-symbol {
+  font-size: 16px;
+  font-weight: 700;
+  color: #fbbf24;
+  font-family: var(--font-mono);
+}
+
+.store-sales-val {
+  font-family: var(--font-mono);
+  font-size: 24px;
+  font-weight: 800;
+  color: #fffbeb;
+  letter-spacing: 0.5px;
+}
+
+.store-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 11px;
+}
+
+.store-market-count-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  background: rgba(217, 119, 6, 0.2);
+  border: 1px solid rgba(245, 158, 11, 0.4);
+  border-radius: 4px;
+  color: #fef08a;
+  font-weight: 600;
+}
+
+.store-top-markets-preview {
+  display: flex;
+  gap: 6px;
+  overflow: hidden;
+}
+
+.top-market-chip {
+  color: #e5e5e5;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(245, 158, 11, 0.2);
+  padding: 1px 6px;
+  border-radius: 3px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+/* ================== 下半部分布局 ================== */
+.dashboard-main-grid {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 2.1fr 1fr;
+  gap: 14px;
+  min-height: 0;
+}
+
+.hud-card {
+  position: relative;
+  background: var(--bg-card);
+  border: 1px solid var(--border-card);
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+}
+
+.hud-corner {
+  display: none;
+}
+
+.hud-card-header {
+  height: 44px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  border-bottom: 1px solid rgba(217, 119, 6, 0.2);
+  background: rgba(45, 35, 18, 0.25);
+}
+
+.hud-card-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  font-weight: 700;
+  color: #fef3c7;
+}
+
+.title-icon-bar {
+  width: 4px;
+  height: 14px;
+  background: linear-gradient(180deg, #fbbf24 0%, #d97706 100%);
+  border-radius: 2px;
+  box-shadow: 0 0 8px rgba(245, 158, 11, 0.5);
+}
+
+.view-tabs-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.view-tab-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(217, 119, 6, 0.25);
+  color: var(--text-muted);
+  padding: 4px 10px;
+  font-size: 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.view-tab-btn:hover {
+  color: #ffffff;
+  border-color: #fbbf24;
+  background: rgba(217, 119, 6, 0.2);
+}
+
+.view-tab-btn.active {
+  background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%);
+  border-color: #f59e0b;
+  color: #17130a;
+  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.4);
+}
+
+.hud-card-body {
+  flex: 1;
+  position: relative;
+  min-height: 0;
+  overflow: hidden;
+}
+
+#mainBarChartContainer {
+  width: 100%;
+  height: 100%;
+}
+
+#mainBarChart {
+  width: 100%;
+  height: 100%;
+}
+
+#quadViewContainer {
+  display: none;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  gap: 8px;
+  width: 100%;
+  height: 100%;
+  padding: 8px;
+}
+
+.quad-item {
+  position: relative;
+  background: rgba(18, 18, 24, 0.7);
+  border: 1px solid rgba(217, 119, 6, 0.25);
+  border-radius: 6px;
+  display: flex;
+  flex-direction: column;
+}
+
+.quad-item-title {
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 10px;
+  font-size: 11px;
+  font-weight: 700;
+  background: rgba(45, 35, 18, 0.3);
+  border-bottom: 1px solid rgba(217, 119, 6, 0.2);
+  color: #fef08a;
+}
+
+.quad-chart-canvas {
+  flex: 1;
+  width: 100%;
+  min-height: 0;
+}
+
+.dashboard-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 0;
+}
+
+.sidebar-half-card {
+  flex: 1;
+  min-height: 0;
+}
+
+.market-table-wrapper {
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+  padding: 4px 8px;
+}
+
+.market-table-wrapper::-webkit-scrollbar {
+  width: 4px;
+}
+.market-table-wrapper::-webkit-scrollbar-thumb {
+  background: rgba(217, 119, 6, 0.4);
+  border-radius: 2px;
+}
+
+.tech-market-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.tech-market-table th {
+  position: sticky;
+  top: 0;
+  background: rgba(22, 22, 29, 0.98);
+  color: #d4af37;
+  font-weight: 600;
+  text-align: left;
+  padding: 6px 8px;
+  border-bottom: 1px solid rgba(217, 119, 6, 0.25);
+  z-index: 2;
+}
+
+.tech-market-table td {
+  padding: 7px 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  color: #f5f5f5;
+}
+
+.market-row:hover {
+  background: rgba(245, 158, 11, 0.12);
+}
+
+.col-rank {
+  width: 38px;
+  text-align: center;
+}
+
+.rank-num {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.col-store {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  color: #ffffff;
+  white-space: nowrap;
+}
+
+.store-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.col-market-name {
+  width: 80px;
+}
+
+.market-name-tag {
+  display: inline-block;
+  padding: 2px 8px;
+  background: rgba(217, 119, 6, 0.2);
+  border: 1px solid rgba(245, 158, 11, 0.4);
+  color: #fef08a;
+  border-radius: 4px;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 11px;
+  text-align: center;
+}
+
+.col-sales {
+  min-width: 140px;
+}
+
+.val-bar-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.usd-val {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  color: #fbbf24;
+  font-size: 13px;
+}
+
+.mini-bar-track {
+  width: 100%;
+  height: 3px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.mini-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #d97706, #fbbf24);
+}

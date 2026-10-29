@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="black-gold">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AMS 销售看板 - 黑五黑金尊享版</title>
+  <link rel="stylesheet" href="../css/theme-black-gold.css?v=20261029" />
+</head>
+<body>
+  <div class="dashboard-screen">
+    <!-- ================== 顶部 Header 控制大厅 ================== -->
+    <header class="dashboard-header">
+      <div class="header-top-accent"></div>
+
+      <!-- 左侧：3D 地球仪与实时时钟 -->
+      <div class="header-left-zone">
+        <div class="globe-wrapper" title="出海全球多市场航线网络">
+          <canvas id="earthGlobeCanvas"></canvas>
+        </div>
+        <div class="tech-clock-badge">
+          <span id="techClockText">2026-10-29 11:00:00</span>
+          <span class="tech-lines">\\\\</span>
+        </div>
+      </div>
+
+      <!-- 中间：AMS 总销售额黑金大屏舞台 (统一美元 $) -->
+      <div class="header-center-zone">
+        <div class="ams-title-wrapper">
+          <h1 class="ams-header-title">AMS 总销售额</h1>
+        </div>
+        <div class="ams-counter-stage">
+          <div class="ams-flip-counter" id="amsFlipCounter">
+            <!-- 动态生成数码翻牌器框体 -->
+          </div>
+        </div>
+      </div>
+
+      <!-- 右侧：全屏与多版本切换导航 -->
+      <div class="header-right-zone">
+        <div class="theme-switcher-capsule">
+          <a href="../version-business-blue/index.html" class="theme-pill-btn">🏢 商务科技蓝</a>
+          <a href="../version-black-gold/index.html" class="theme-pill-btn active">🏆 黑五黑金</a>
+          <a href="../version-minimal-slate/index.html" class="theme-pill-btn">⚡ 极简现代灰</a>
+          <a href="../version-cyberpunk/index.html" class="theme-pill-btn">🌌 赛博朋克</a>
+        </div>
+        <button id="fullscreenToggleBtn" class="fullscreen-btn" title="全屏切换">
+          <span>⛶</span> 全屏
+        </button>
+      </div>
+    </header>
+
+    <!-- ================== 看板核心工作区 ================== -->
+    <main class="dashboard-main">
+      <!-- 1. 四大店铺销售额核心卡片组 -->
+      <section class="stores-kpi-row">
+        <!-- 店铺 1: aosom.eu -->
+        <div class="store-kpi-card" data-store-name="aosom.eu" title="点击聚焦查看 aosom.eu 柱状图">
+          <div class="store-card-header">
+            <div class="store-brand-info">
+              <span class="brand-status-dot" style="background:#f59e0b;"></span>
+              <span class="store-name-text">aosom.eu</span>
+              <span class="store-category-tag">欧洲全品类</span>
+            </div>
+            <div class="store-share-percent">占比 <span class="store-share-val">45.0%</span></div>
+          </div>
+          <div class="store-card-body">
+            <span class="store-currency-symbol">$</span>
+            <span class="store-sales-val">867,324</span>
+          </div>
+          <div class="store-card-footer">
+            <div class="store-markets-summary"></div>
+          </div>
+        </div>
+
+        <!-- 店铺 2: homcom.fr -->
+        <div class="store-kpi-card" data-store-name="homcom.fr" title="点击聚焦查看 homcom.fr 柱状图">
+          <div class="store-card-header">
+            <div class="store-brand-info">
+              <span class="brand-status-dot" style="background:#fbbf24;"></span>
+              <span class="store-name-text">homcom.fr</span>
+              <span class="store-category-tag">法国家居</span>
+            </div>
+            <div class="store-share-percent">占比 <span class="store-share-val">21.4%</span></div>
+          </div>
+          <div class="store-card-body">
+            <span class="store-currency-symbol">$</span>
+            <span class="store-sales-val">412,987</span>
+          </div>
+          <div class="store-card-footer">
+            <div class="store-markets-summary"></div>
+          </div>
+        </div>
+
+        <!-- 店铺 3: homcomstore -->
+        <div class="store-kpi-card" data-store-name="homcomstore" title="点击聚焦查看 homcomstore 柱状图">
+          <div class="store-card-header">
+            <div class="store-brand-info">
+              <span class="brand-status-dot" style="background:#f43f5e;"></span>
+              <span class="store-name-text">homcomstore</span>
+              <span class="store-category-tag">全球品牌站</span>
+            </div>
+            <div class="store-share-percent">占比 <span class="store-share-val">20.2%</span></div>
+          </div>
+          <div class="store-card-body">
+            <span class="store-currency-symbol">$</span>
+            <span class="store-sales-val">388,536</span>
+          </div>
+          <div class="store-card-footer">
+            <div class="store-markets-summary"></div>
+          </div>
+        </div>
+
+        <!-- 店铺 4: outsunny.fr -->
+        <div class="store-kpi-card" data-store-name="outsunny.fr" title="点击聚焦查看 outsunny.fr 柱状图">
+          <div class="store-card-header">
+            <div class="store-brand-info">
+              <span class="brand-status-dot" style="background:#10b981;"></span>
+              <span class="store-name-text">outsunny.fr</span>
+              <span class="store-category-tag">法国户外庭院</span>
+            </div>
+            <div class="store-share-percent">占比 <span class="store-share-val">13.4%</span></div>
+          </div>
+          <div class="store-card-body">
+            <span class="store-currency-symbol">$</span>
+            <span class="store-sales-val">259,059</span>
+          </div>
+          <div class="store-card-footer">
+            <div class="store-markets-summary"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 2. 下半部分核心主区 -->
+      <section class="dashboard-main-grid">
+        <!-- 左侧：主柱状图卡片 -->
+        <div class="hud-card main-chart-hud-card">
+          <div class="hud-card-header">
+            <div class="hud-card-title">
+              <span class="title-icon-bar"></span>
+              <span>各店铺市场销售分布柱状图 (参考图一)</span>
+            </div>
+
+            <!-- 视图模式切换 -->
+            <div class="view-tabs-group">
+              <button class="view-tab-btn active" data-mode="all" title="全景多市场四店对比">四店联合对比</button>
+              <button class="view-tab-btn" data-mode="quad" title="同时独立展示4个店铺的2x2柱状图分屏">2x2 四分屏独立矩阵</button>
+              <button class="view-tab-btn" data-mode="store" data-store="aosom.eu">aosom.eu</button>
+              <button class="view-tab-btn" data-mode="store" data-store="homcom.fr">homcom.fr</button>
+              <button class="view-tab-btn" data-mode="store" data-store="homcomstore">homcomstore</button>
+              <button class="view-tab-btn" data-mode="store" data-store="outsunny.fr">outsunny.fr</button>
+            </div>
+          </div>
+
+          <div class="hud-card-body">
+            <div id="mainBarChartContainer">
+              <div id="mainBarChart"></div>
+            </div>
+
+            <div id="quadViewContainer">
+              <div class="quad-item">
+                <div class="quad-item-title" style="color:#fbbf24;">
+                  <span>aosom.eu 市场销售柱状图</span>
+                </div>
+                <div class="quad-chart-canvas" id="quad_aosom_eu"></div>
+              </div>
+
+              <div class="quad-item">
+                <div class="quad-item-title" style="color:#f59e0b;">
+                  <span>homcom.fr 市场销售柱状图</span>
+                </div>
+                <div class="quad-chart-canvas" id="quad_homcom_fr"></div>
+              </div>
+
+              <div class="quad-item">
+                <div class="quad-item-title" style="color:#f43f5e;">
+                  <span>homcomstore 市场销售柱状图</span>
+                </div>
+                <div class="quad-chart-canvas" id="quad_homcomstore"></div>
+              </div>
+
+              <div class="quad-item">
+                <div class="quad-item-title" style="color:#10b981;">
+                  <span>outsunny.fr 市场销售柱状图</span>
+                </div>
+                <div class="quad-chart-canvas" id="quad_outsunny_fr"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 右侧边栏：四店铺占比环形图 + 多市场数据排行榜 -->
+        <div class="dashboard-sidebar">
+          <div class="hud-card sidebar-half-card" style="flex: 0.85;">
+            <div class="hud-card-header">
+              <div class="hud-card-title">
+                <span class="title-icon-bar" style="background:#f59e0b;"></span>
+                <span>四店铺销售额贡献占比</span>
+              </div>
+            </div>
+            <div class="hud-card-body">
+              <div id="storeShareChart" style="width:100%;height:100%;"></div>
+            </div>
+          </div>
+
+          <div class="hud-card sidebar-half-card" style="flex: 1.15;">
+            <div class="hud-card-header">
+              <div class="hud-card-title">
+                <span class="title-icon-bar" style="background:#fbbf24;"></span>
+                <span>店铺与市场销售额排行榜</span>
+              </div>
+            </div>
+            <div class="hud-card-body">
+              <div class="market-table-wrapper">
+                <table class="tech-market-table">
+                  <thead>
+                    <tr>
+                      <th class="col-rank">排名</th>
+                      <th>所属店铺</th>
+                      <th>市场</th>
+                      <th>销售额 ($)</th>
+                    </tr>
+                  </thead>
+                  <tbody id="marketTableBody">
+                    <!-- 动态生成数据行 -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- 引入依赖脚本 -->
+  <script src="../lib/echarts.min.js"></script>
+  <script>
+    window.ACTIVE_THEME = 'black-gold';
+  </script>
+  <script src="../js/dataService.js"></script>
+  <script src="../js/globe.js"></script>
+  <script src="../js/charts.js"></script>
+  <script src="../js/dashboard.js"></script>
+  <script>
+    document.getElementById('fullscreenToggleBtn')?.addEventListener('click', () => {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(err => console.log(err));
+      } else {
+        document.exitFullscreen().catch(err => console.log(err));
+      }
+    });
+  </script>
+</body>
+</html>

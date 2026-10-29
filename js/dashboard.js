@@ -141,6 +141,13 @@ class DashboardController {
       const shareEl = card.querySelector('.store-share-val');
       const marketsSummaryEl = card.querySelector('.store-markets-summary');
 
+      const dot = card.querySelector('.brand-status-dot');
+      if (dot && window.dashboardCharts) {
+        const themeColor = window.dashboardCharts.getStoreColor(store.storeName, store.color);
+        dot.style.backgroundColor = themeColor;
+        dot.style.boxShadow = `0 0 6px ${themeColor}`;
+      }
+
       if (salesEl) salesEl.innerText = `$ ${store.storeSales.toLocaleString()}`;
 
       const sharePct = ((store.storeSales / (data.amsTotalSales || 1)) * 100).toFixed(1);
@@ -151,12 +158,12 @@ class DashboardController {
         const numMarkets = store.markets.length;
         const marketTags = store.markets.slice(0, 3).map(m => {
           const kVal = m.sales >= 1000 ? (m.sales / 1000).toFixed(0) + 'k' : m.sales;
-          return `<span class="market-tag-pill">${m.marketName} $${kVal}</span>`;
+          return `<span class="top-market-chip">${m.marketName} $${kVal}</span>`;
         }).join('');
 
         marketsSummaryEl.innerHTML = `
-          <span class="market-count-badge">${numMarkets}个市场</span>
-          <div class="market-tags-list">${marketTags}</div>
+          <span class="store-market-count-badge">${numMarkets}个市场</span>
+          <div class="store-top-markets-preview">${marketTags}</div>
         `;
       }
     });
@@ -174,19 +181,21 @@ class DashboardController {
     if (this.activeStoreName !== 'all') {
       const s = data.stores.find(st => st.storeName === this.activeStoreName);
       if (s) {
+        const sColor = window.dashboardCharts ? window.dashboardCharts.getStoreColor(s.storeName, s.color) : s.color;
         marketList = s.markets.map(m => ({
           storeName: s.storeName,
-          storeColor: s.color,
+          storeColor: sColor,
           marketName: m.marketName,
           sales: m.sales
         }));
       }
     } else {
       data.stores.forEach(s => {
+        const sColor = window.dashboardCharts ? window.dashboardCharts.getStoreColor(s.storeName, s.color) : s.color;
         s.markets.forEach(m => {
           marketList.push({
             storeName: s.storeName,
-            storeColor: s.color,
+            storeColor: sColor,
             marketName: m.marketName,
             sales: m.sales
           });
