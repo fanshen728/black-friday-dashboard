@@ -15,6 +15,32 @@
  * 设计原则：KISS, SOLID, DRY, 离线运行, 60FPS+ 硬件加速, 完美释放显存
  */
 
+// ==========================================================
+// 里程碑突破特效配置 (用户可随时在此处或控制台快速修改)
+// ==========================================================
+// 里程碑突破阶梯规则：5000 -> 10000 -> 此后每加 1w (10000) 播放一次
+// 会话级控制：首次进入达成的最高档位(如5w)仅播放一次5w，后续每迈过新的一万档播放一次
+// ==========================================================
+window.MILESTONE_CONFIG = {
+  // 规则描述
+  rule: '5k/10k/step_1w',
+  sessionOnce: true
+};
+
+window.resetMilestoneSession = function() {
+  try {
+    sessionStorage.removeItem('ams_last_celebrated_milestone');
+    Object.keys(sessionStorage).forEach(k => {
+      if (k.startsWith('ams_')) sessionStorage.removeItem(k);
+    });
+    if (window.celebrationEngine) {
+      window.celebrationEngine.lastProcessedMilestone = 0;
+      window.celebrationEngine.celebratedMilestones.clear();
+    }
+    console.log('[Milestone] 会话触发状态已重置');
+  } catch (e) {}
+};
+
 class MilestoneCelebrationEngine {
   constructor() {
     this.overlay = null;
@@ -120,55 +146,9 @@ class MilestoneCelebrationEngine {
           <div class="celebration-brand-caption" id="celebrationBrandCaption">Aosom 2026</div>
         </div>
 
-        <!-- 底部数据明细卡片与操作栏 -->
-        <div class="celebration-bottom-group">
-          <!-- 档位一键切换胶囊条 (5,000 / 10,000 / 实时战报) -->
-          <div class="milestone-tier-switcher">
-            <button type="button" class="tier-tab-btn tier-gold active" data-tier="5k">
-              <span>🎯</span> 5,000 销量特效
-            </button>
-            <button type="button" class="tier-tab-btn tier-diamond" data-tier="10k">
-              <span>💎</span> 10,000 销量特效
-            </button>
-            <button type="button" class="tier-tab-btn" data-tier="live">
-              <span>⚡</span> 实时最新战报
-            </button>
-          </div>
-
-          <!-- 战报指标板 -->
-          <div class="celebration-metrics-board">
-            <div class="celebration-metric-item">
-              <span class="c-label" id="cLabelRev">全站总营收 (USD)</span>
-              <span class="c-val highlight-gold" id="cValRev">$0</span>
-            </div>
-            <div class="celebration-metric-item">
-              <span class="c-label" id="cLabelOrders">全站订单总量</span>
-              <span class="c-val highlight-cyan" id="cValOrders">0</span>
-            </div>
-            <div class="celebration-metric-item">
-              <span class="c-label" id="cLabelConv">全店综合转化率</span>
-              <span class="c-val" id="cValConv">0.00%</span>
-            </div>
-            <div class="celebration-metric-item">
-              <span class="c-label" id="cLabelTopStore">领跑最高店铺</span>
-              <span class="c-val" id="cValTopStore">-</span>
-            </div>
-          </div>
-
-          <div class="celebration-actions-row">
-            <div class="celebration-hint-text">
-              <span>按 <kbd>ESC</kbd> 或点击空白处关闭战报</span>
-            </div>
-            <div class="celebration-btn-group">
-              <button type="button" class="celebration-btn celebration-btn-replay" id="celebrationReplayBtn">
-                ↻ 重播特效
-              </button>
-              <button type="button" class="celebration-btn celebration-btn-close" id="celebrationCloseBtn">
-                ✕ 关闭战报
-              </button>
-            </div>
-          </div>
-        </div>
+        <!-- 右上角悬浮关闭按钮与底部轻量提示 (纯粹沉浸式 3D 特效体验) -->
+        <button type="button" class="celebration-floating-close-btn" id="celebrationFloatingCloseBtn" title="点击或按ESC关闭">✕</button>
+        <div class="celebration-floating-hint">点击屏幕任意位置或按 ESC 即可退出</div>
       `;
       document.body.appendChild(overlay);
     }
@@ -187,40 +167,15 @@ class MilestoneCelebrationEngine {
 
     if (!this.overlay) return;
 
-    // 点击空白处关闭
-    this.overlay.addEventListener('click', (e) => {
-      if (
-        e.target.closest('.celebration-bottom-group') ||
-        e.target.closest('.celebration-metrics-board') ||
-        e.target.closest('.celebration-btn-group') ||
-        e.target.closest('.milestone-tier-switcher') ||
-        e.target.closest('.celebration-top-banner')
-      ) {
-        return;
-      }
+    // 点击屏幕任意位置快速退出
+    this.overlay.addEventListener('click', () => {
       this.close();
     });
 
-    // 关闭按钮
-    document.getElementById('celebrationCloseBtn')?.addEventListener('click', (e) => {
+    // 右上角关闭按钮
+    document.getElementById('celebrationFloatingCloseBtn')?.addEventListener('click', (e) => {
       e.stopPropagation();
       this.close();
-    });
-
-    // 重播按钮
-    document.getElementById('celebrationReplayBtn')?.addEventListener('click', (e) => {
-      e.stopPropagation();
-      this.launchTier(this.currentTier);
-    });
-
-    // 档位快速切换 (5,000 / 10,000 / 实时)
-    const tierTabs = this.overlay.querySelectorAll('.tier-tab-btn');
-    tierTabs.forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const tier = btn.dataset.tier;
-        this.launchTier(tier);
-      });
     });
 
     // ESC 键退出
@@ -640,11 +595,14 @@ class MilestoneCelebrationEngine {
     this.overlay.classList.add('active');
     this.overlay.classList.add(`theme-${this.currentTier}`);
 
-    // 档位按钮激活态
-    const tabs = this.overlay.querySelectorAll('.tier-tab-btn');
-    tabs.forEach(t => {
-      t.classList.toggle('active', t.dataset.tier === this.currentTier);
-    });
+    // 自动轻柔退出定时器 (7.5秒后自动关闭，期间点击任意位置亦可立即关闭)
+    if (this.autoCloseTimer) {
+      clearTimeout(this.autoCloseTimer);
+      this.autoCloseTimer = null;
+    }
+    this.autoCloseTimer = setTimeout(() => {
+      this.close();
+    }, 7500);
 
     // 文本更新
     const mainTitleEl = document.getElementById('celebrationMainTitle');
@@ -659,32 +617,6 @@ class MilestoneCelebrationEngine {
     }
     if (brandCaptionEl) {
       brandCaptionEl.innerText = 'Aosom 2026';
-    }
-
-    // 回显看板数据指标
-    const stats = config.stats || (window.dataService ? window.dataService.getData() : null);
-    if (stats) {
-      const cValRev = document.getElementById('cValRev');
-      const cValOrders = document.getElementById('cValOrders');
-      const cValConv = document.getElementById('cValConv');
-      const cValTopStore = document.getElementById('cValTopStore');
-
-      const rev = stats.amsTotalSales || 0;
-      const orders = stats.amsTotalOrders || 0;
-      const conv = stats.amsConversionRate || stats.amsConversion || 5.32;
-
-      if (cValRev) cValRev.innerText = '$' + rev.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-      if (cValOrders) cValOrders.innerText = orders.toLocaleString('en-US');
-      if (cValConv) cValConv.innerText = (typeof conv === 'number' ? conv : 5.32).toFixed(2) + '%';
-      if (cValTopStore) {
-        const lead = stats.leadingStore || (stats.stores && stats.stores[0]);
-        if (lead) {
-          const sSales = lead.sales || lead.storeSales || lead.totalSales || 0;
-          cValTopStore.innerText = `${lead.storeName} ($${sSales.toLocaleString('en-US', { maximumFractionDigits: 0 })})`;
-        } else {
-          cValTopStore.innerText = 'HOMCOM Store ($1,376,124)';
-        }
-      }
     }
 
     // 重构 3D 数字粒子点阵
@@ -1228,27 +1160,76 @@ class MilestoneCelebrationEngine {
   }
 
   /**
-   * 自动数据阈值监听
+   * 阶梯阈值计算：
+   * 1. 5000 播放一次
+   * 2. 10000 播放一次
+   * 3. 此后每加 1w (10000) 播放一次 (2w, 3w, 4w, 5w, ...)
+   * 若店铺首次进入金额就是 5w (50,000)，则计算出的最高达成里程碑就是 50000，只播放一次 5w 的动画！
+   */
+  calculateHighestMilestone(val) {
+    const num = Math.floor(Number(val) || 0);
+    if (num < 5000) return 0;
+    if (num < 10000) return 5000;
+    return Math.floor(num / 10000) * 10000;
+  }
+
+  /**
+   * 自动数据阈值监听：
+   * - 在本次会话中，初次加载计算出当前最高达成里程碑 (例如 5w)，仅播放这一个最高里程碑；
+   * - 播放后记录到会话 (sessionStorage)；
+   * - 后续轮询时，只有当金额再次突破新的 1w 台阶 (例如由 5w 涨到 6w) 时，才会再次播放对应的新里程碑；
+   * - 若金额未跨过新的一万档，则绝不重复播放，除非新开会话。
    */
   checkMilestones(data) {
     if (!data) return;
-    const orders = data.amsTotalOrders || 0;
+    const sales = Number(data.amsTotalSales || 0);
+    const targetMilestone = this.calculateHighestMilestone(sales);
+    if (targetMilestone <= 0) return;
 
-    if (orders >= 5000 && !this.celebratedMilestones.has('tier_5k')) {
-      this.celebratedMilestones.add('tier_5k');
-      if (this.lastProcessedOrders > 0) {
-        this.launchTier('5k');
+    const sessionKey = 'ams_last_celebrated_milestone';
+    let lastCelebrated = 0;
+    try {
+      const stored = sessionStorage.getItem(sessionKey);
+      if (stored !== null) {
+        lastCelebrated = parseInt(stored, 10) || 0;
       }
+    } catch (e) {
+      lastCelebrated = this.lastProcessedMilestone || 0;
     }
 
-    if (orders >= 10000 && !this.celebratedMilestones.has('tier_10k')) {
-      this.celebratedMilestones.add('tier_10k');
-      if (this.lastProcessedOrders > 0) {
-        this.launchTier('10k');
-      }
+    // 只有当达成的最高里程碑严格大于上次已播放过的里程碑时才触发
+    if (targetMilestone > lastCelebrated) {
+      try {
+        sessionStorage.setItem(sessionKey, String(targetMilestone));
+      } catch (e) {}
+      this.lastProcessedMilestone = targetMilestone;
+
+      // 启动突破特效
+      this.launchSalesMilestone(sales, targetMilestone, data);
     }
 
-    this.lastProcessedOrders = orders;
+    this.lastProcessedSales = sales;
+  }
+
+  /**
+   * 按达成里程碑启动真 3D 突破大招
+   */
+  launchSalesMilestone(sales, milestone, data) {
+    const isEn = window.i18n && window.i18n.currentLang === 'en';
+    const milestoneNum = Number(milestone);
+    const milestoneStr = '$' + milestoneNum.toLocaleString('en-US');
+    const salesNum = Number(sales);
+    const salesStr = '$' + salesNum.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const tier = milestoneNum >= 10000 ? '10k' : '5k';
+
+    this.launch({
+      tier,
+      targetNum: milestoneNum,
+      amount: milestoneStr,
+      title: isEn ? `AMS 2026 TOTAL REVENUE SURPASSED ${milestoneStr} USD!` : `AMS 2026 全店铺总销售额突破 ${milestoneStr} 美元！`,
+      subtitle: isEn ? `Global Ops Real-Time Record · Current Total: ${salesStr} USD` : `全球电商黑五作战中心实时战报 · 当前总营收 ${salesStr} USD`,
+      stats: data
+    });
   }
 }
 
@@ -1271,25 +1252,20 @@ window.closeMilestoneCelebration = function() {
 };
 
 /**
- * 演示触发器 (支持 '5k' / '10k' / 'live' 或自定义金额)
+ * 演示触发器 (支持传入模拟金额，如 50000 演示 5w 突破，或不传参自动取当前最高达成里程碑)
  */
-window.triggerMilestoneFx = function(tierOrAmount = '5k') {
+window.triggerMilestoneFx = function(targetAmount = null) {
   if (!window.celebrationEngine) return;
 
-  if (tierOrAmount === '5k' || tierOrAmount === '10k' || tierOrAmount === 'live') {
-    window.celebrationEngine.launchTier(tierOrAmount);
-  } else {
-    const num = parseInt(String(tierOrAmount).replace(/[^0-9]/g, ''), 10) || 5000;
-    const assignedTier = num >= 10000 ? '10k' : '5k';
-    const isEn = window.i18n && window.i18n.currentLang === 'en';
-    const cleanAmount = String(tierOrAmount);
+  const data = window.dataService ? window.dataService.getData() : null;
+  const sales = data ? Number(data.amsTotalSales || 0) : 50000;
 
-    window.celebrationEngine.launch({
-      tier: assignedTier,
-      amount: cleanAmount,
-      title: isEn ? `AMS 2026 TOTAL SALES SURPASSED ${cleanAmount}!` : `AMS 2026 总销量突破 ${cleanAmount}！`,
-      subtitle: isEn ? 'Aosom 2026 Global Ops Milestone Record' : '全球电商黑五作战中心实时战报播报',
-      stats: window.dataService ? window.dataService.getData() : null
-    });
+  if (!targetAmount) {
+    const milestone = window.celebrationEngine.calculateHighestMilestone(sales) || 50000;
+    window.celebrationEngine.launchSalesMilestone(sales, milestone, data);
+    return;
   }
+
+  const num = parseInt(String(targetAmount).replace(/[^0-9]/g, ''), 10) || 50000;
+  window.celebrationEngine.launchSalesMilestone(sales, num, data);
 };

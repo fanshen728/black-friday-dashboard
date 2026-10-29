@@ -80,6 +80,20 @@ class DashboardController {
         }
       });
     });
+    // 时间周期预设切换 (黑五大促 / 今日 / 近7天 / 近30天)
+    const presetPills = document.querySelectorAll('.preset-pill');
+    presetPills.forEach(pill => {
+      pill.addEventListener('click', e => {
+        const target = e.currentTarget;
+        presetPills.forEach(p => p.classList.remove('active'));
+        target.classList.add('active');
+        const preset = target.dataset.preset;
+        if (window.dataService) {
+          window.dataService.setTimePreset(preset);
+        }
+      });
+    });
+
     // 里程碑突破 3D 烟花粒子特效演示按钮
     const demoBtn = document.getElementById('milestoneDemoBtn');
     if (demoBtn) {
@@ -94,6 +108,9 @@ class DashboardController {
   handleDataUpdate(data) {
     if (!data) return;
     this.currentData = data;
+
+    // 0. 更新接口连接状态与时间显示
+    this.renderApiStatusAndTime(data);
 
     // 1. 顶部全局营收与订单分析指标
     this.renderGlobalPerformance(data);
@@ -118,6 +135,27 @@ class DashboardController {
     }
   }
 
+  renderApiStatusAndTime(data) {
+    const timeRangeEl = document.getElementById('currentTimeRangeText');
+    if (timeRangeEl && data.apiInfo) {
+      const bDate = data.apiInfo.payTimeBegin ? data.apiInfo.payTimeBegin.split(' ')[0] : '2026-10-20';
+      const eDate = data.apiInfo.payTimeEnd ? data.apiInfo.payTimeEnd.split(' ')[0] : '2026-10-30';
+      timeRangeEl.innerText = `${bDate} ~ ${eDate}`;
+    }
+
+    const badgeEl = document.getElementById('apiStatusBadge');
+    const textEl = document.getElementById('apiStatusText');
+    if (badgeEl && textEl) {
+      if (data.isRealApi) {
+        badgeEl.classList.remove('error');
+        textEl.innerText = 'BFF 实时连接';
+      } else {
+        badgeEl.classList.add('error');
+        textEl.innerText = '离线兜底中';
+      }
+    }
+  }
+
   /**
    * 1. 顶部全局营收指标区
    */
@@ -135,6 +173,18 @@ class DashboardController {
     const totalOrdersEl = document.getElementById('globalTotalOrders');
     if (totalOrdersEl) {
       totalOrdersEl.innerText = Number(data.amsTotalOrders || 0).toLocaleString('en-US');
+    }
+
+    // 全店铺订单附注：采用真实店铺与市场汇聚统计 (剔除原型 mock 占位符)
+    const ordersSubNoteEl = document.querySelector('.orders-sub-note');
+    if (ordersSubNoteEl && data.stores) {
+      const storeCount = data.stores.length;
+      let totalMarkets = 0;
+      data.stores.forEach(s => totalMarkets += (s.marketCount || (s.markets ? s.markets.length : 0)));
+      const isEn = window.i18n && window.i18n.currentLang === 'en';
+      ordersSubNoteEl.innerText = isEn
+        ? `● Active: ${storeCount} Stores · ${totalMarkets} Markets Total`
+        : `● 实时汇聚：${storeCount} 个店铺 · ${totalMarkets} 个国家市场`;
     }
 
     // 全店铺平均客单价 (AOV = 总金额 / 总订单数)
@@ -181,56 +231,47 @@ class DashboardController {
    * 3. 四大店铺营收卡片 (Orders by storefront)
    */
   renderStorefrontCards(data) {
+    const container = document.querySelector('.storefronts-grid') || document.querySelector('.storefronts-carousel-grid');
+    if (!container || !data.stores) return;
     const t = k => (window.i18n ? window.i18n.t(k) : k);
-    data.stores.forEach(store => {
-      const card = document.querySelector(`.storefront-card[data-store-id="${store.storeId}"]`);
-      if (!card) return;
 
-      // 类型标签 (品牌站 / 泛欧站)
-      const typeBadge = card.querySelector('.store-type-badge');
-      if (typeBadge) {
-        typeBadge.innerText = store.type === 'brand' ? t('tagBrand') : t('tagPanEu');
-      }
+    let html = '';
+    data.stores.forEach((store, idx) => {
+      const idxStr = String(idx + 1).padStart(2, '0');
+      const isBrand = store.type === 'brand';
+      const typeBadgeClass = isBrand ? '' : 'paneu';
+      const typeBadgeText = isBrand ? t('tagBrand') : t('tagPanEu');
+      const marketSuffix = store.marketCount === 1 ? t('marketSuffixSingle') : t('marketsSuffix');
+      const marketChips = store.markets.map(m => m.marketName).join(' · ');
 
-      // 在线状态
-      const statusOnline = card.querySelector('.store-status-online');
-      if (statusOnline) {
-        statusOnline.innerText = t('onlineStatus');
-      }
-
-      // 订单数量
-      const ordersEl = card.querySelector('.card-orders-num');
-      if (ordersEl) {
-        ordersEl.innerText = store.storeOrders.toLocaleString('en-US');
-      }
-      const ordersUnitLabel = card.querySelector('.orders-unit-label');
-      if (ordersUnitLabel) {
-        ordersUnitLabel.innerText = t('ordersUnit');
-      }
-
-      // 营收 (USD)
-      const revEl = card.querySelector('.card-revenue-num');
-      if (revEl) {
-        revEl.innerText = `$${store.storeSales.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USD`;
-      }
-      const revTinyLabel = card.querySelector('.revenue-tiny-label');
-      if (revTinyLabel) {
-        revTinyLabel.innerText = t('revenueUnit');
-      }
-
-      // 市场数量与市场标签预览
-      const marketsCountEl = card.querySelector('.card-markets-count');
-      if (marketsCountEl) {
-        const sfx = store.marketCount === 1 ? t('marketSuffixSingle') : t('marketsSuffix');
-        marketsCountEl.innerText = `${store.marketCount} ${sfx}`;
-      }
-
-      const marketListEl = card.querySelector('.card-markets-chips');
-      if (marketListEl) {
-        const preview = store.markets.map(m => m.marketName).join(' · ');
-        marketListEl.innerText = preview;
-      }
+      html += `
+        <div class="storefront-card" data-store-id="${store.storeId}">
+          <div class="storefront-card-top">
+            <div class="store-id-name-wrap">
+              <span class="store-idx">${idxStr}</span>
+              <span class="store-name-bold" title="${store.storeName}">${store.storeName}</span>
+              <span class="store-type-badge ${typeBadgeClass}">${typeBadgeText}</span>
+            </div>
+            <span class="store-status-online">${t('onlineStatus')}</span>
+          </div>
+          <div class="store-card-middle">
+            <div>
+              <span class="card-orders-num">${store.storeOrders.toLocaleString('en-US')}</span>
+              <span class="orders-unit-label" data-i18n="ordersUnit">${t('ordersUnit')}</span>
+            </div>
+            <div class="card-revenue-box">
+              <span class="revenue-tiny-label" data-i18n="revenueUnit">${t('revenueUnit')}</span>
+              <span class="card-revenue-num">$${store.storeSales.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USD</span>
+            </div>
+          </div>
+          <div class="storefront-card-bottom">
+            <span class="card-markets-chips" title="${marketChips}">${marketChips || '-'}</span>
+            <span class="card-markets-count">${store.marketCount} ${marketSuffix}</span>
+          </div>
+        </div>
+      `;
     });
+    container.innerHTML = html;
   }
 
   /**

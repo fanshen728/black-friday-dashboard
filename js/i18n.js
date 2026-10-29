@@ -22,7 +22,7 @@ const I18N_TRANSLATIONS = {
     globalPerfTitle: '实时销售与订单综合分析',
     totalGrossRevenue: '全店铺总营收 (USD)',
     totalOrdersProcessed: '全店铺订单总量',
-    ordersCompletedNote: '全站店铺合计 ↗ 21.4%',
+    ordersCompletedNote: '全站店铺实时汇总',
     aovLabel: '全店平均客单价 (AOV)',
     convLabel: '全店综合转化率',
 
@@ -89,7 +89,7 @@ const I18N_TRANSLATIONS = {
     globalPerfTitle: 'Live sales & order analytics',
     totalGrossRevenue: 'TOTAL GROSS REVENUE (USD)',
     totalOrdersProcessed: 'TOTAL ORDERS PROCESSED',
-    ordersCompletedNote: 'Completed across all stores ↗ 21.4%',
+    ordersCompletedNote: 'Completed across all stores',
     aovLabel: 'AVERAGE ORDER VALUE (AOV)',
     convLabel: 'CONVERSION RATE',
 

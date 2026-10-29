@@ -1,15 +1,24 @@
 /**
- * AMS 销售看板 - 数据服务层 (新版排版驱动)
- * 职责：
- * 1. 管理4大店铺及其各个市场的销售额 (sales)、订单数量 (orders)、流量 (traffic)
- * 2. 标记店铺属性：品牌站 (brand) 或 泛欧站 (pan_eu)
- * 3. 前端自动汇总计算：
- *    - 各店铺销售总额、总订单量、客单价 (AOV = 销售额 / 订单量)、转化率 (Conversion = 订单量 / 流量)
- *    - AMS 全站总销售额 (TOTAL GROSS REVENUE)
- *    - 全店铺订单总量 (TOTAL ORDERS PROCESSED)
- *    - 全店铺客单价 (AOV) 与 全店铺转化率 (CONVERSION RATE)
- *    - 业务线汇总 (全站 / 品牌站 / 泛欧站)
- * 4. 10秒后台静默轮询更新 (自动微脉冲波动)
+ * AMS 销售看板 - 真实数据服务层 (后端接口深度对接)
+ * 
+ * 对接接口：https://amsbff.admindev.aosom.com/platform/oms/saleOrderBoard/statistics
+ * 请求参数：
+ * - storeIds: '2,12' (支持逗号分隔多店铺)
+ * - payTimeBegin: '2026-10-20 00:00:00' (支付起始时间)
+ * - payTimeEnd: '2026-10-30 00:00:00' (支付截止时间)
+ * 
+ * 返回字段规范：
+ * - storeId: 店铺编号
+ * - storeName: 店铺名称 (如 "AMB店铺002", "泛欧数据迁移店铺不要动")
+ * - storeType: "1" (品牌站) | "2" (泛欧站)
+ * - markets: [ { marketId, marketName, orderCount, orderAmount, conversionRate } ]
+ * 
+ * 前端核心自动计算：
+ * - 全店铺总营收 (USD)、全店铺总订单量
+ * - 全店铺平均客单价 (AOV = 销售额 / 订单量)
+ * - 全店铺综合转化率 (按各市场订单量加权合并)
+ * - 业务线划分 (全站 / 品牌站 / 泛欧站)
+ * - 10秒定时静默增量轮询
  */
 
 class DataService {
@@ -17,110 +26,174 @@ class DataService {
     this.pollInterval = 10; // 10秒轮询
     this.timer = null;
     this.subscribers = [];
-    this.apiEndpoint = '/api/ams/sales';
+
+    // 真实后端接口基础配置
+    this.apiBaseUrl = 'https://amsbff.admindev.aosom.com/platform/oms/saleOrderBoard/statistics';
+    this.storeIds = '2,12';
+
+    // 默认大促周期时间范围 (2026-10-20 00:00:00 至 2026-10-30 00:00:00)
+    this.payTimeBegin = '2026-10-20 00:00:00';
+    this.payTimeEnd = '2026-10-30 00:00:00';
+
+    this.isUsingRealApi = true;
+    this.lastFetchTime = null;
+    this.lastFetchError = null;
     this.currentData = null;
 
-    this.initMockStores();
+    // 本地安全备用数据 (防止网络不可用时页面出现白屏)
+    this.initFallbackStores();
   }
 
   /**
-   * 初始化4大店铺初始数据
-   * 包含：品牌站 (brand) 3家 + 泛欧站 (pan_eu) 1家
+   * 格式化时间为 UTC 标准规范格式：YYYY-MM-DD HH:mm:ss
    */
-  initMockStores() {
-    this.rawStores = [
-      {
-        storeId: 'homcomstore',
-        storeName: 'HOMCOM Store',
-        storeType: '1', // 品牌站
-        type: 'brand',
-        category: '品牌站',
-        icon: '🏠',
-        colorKey: 'homcomstore',
-        markets: [
-          { marketName: 'US', sales: 684200.50, orders: 4410, conversionRate: 5.38 },
-          { marketName: 'UK', sales: 412300.20, orders: 2680, conversionRate: 5.25 },
-          { marketName: 'CA', sales: 279622.95, orders: 1780, conversionRate: 5.23 }
-        ]
-      },
-      {
-        storeId: 'outsunny_fr',
-        storeName: 'Outsunny FR',
-        storeType: '1', // 品牌站
-        type: 'brand',
-        category: '品牌站',
-        icon: '⛺',
-        colorKey: 'outsunny.fr',
-        markets: [
-          { marketName: 'FR', sales: 648900.40, orders: 4450, conversionRate: 5.36 },
-          { marketName: 'BE', sales: 181704.00, orders: 1232, conversionRate: 5.35 }
-        ]
-      },
-      {
-        storeId: 'homcom_fr',
-        storeName: 'HOMCOM FR',
-        storeType: '1', // 品牌站
-        type: 'brand',
-        category: '品牌站',
-        icon: '🛋️',
-        colorKey: 'homcom.fr',
-        markets: [
-          { marketName: 'FR', sales: 751949.00, orders: 4396, conversionRate: 5.34 }
-        ]
-      },
-      {
-        storeId: 'aosom_eu',
-        storeName: 'AOSOM EU',
-        storeType: '2', // 泛欧站
-        type: 'pan_eu',
-        category: '泛欧站',
-        icon: '🇪🇺',
-        colorKey: 'aosom.eu',
-        markets: [
-          { marketName: 'DE', sales: 325400.00, orders: 1920, conversionRate: 5.33 },
-          { marketName: 'UK', sales: 248600.00, orders: 1460, conversionRate: 5.41 },
-          { marketName: 'FR', sales: 186300.00, orders: 1100, conversionRate: 5.24 },
-          { marketName: 'ES', sales: 142100.00, orders: 840, conversionRate: 5.25 },
-          { marketName: 'IT', sales: 118400.00, orders: 700, conversionRate: 5.38 },
-          { marketName: 'PT', sales: 76500.00, orders: 450, conversionRate: 5.29 },
-          { marketName: 'IE', sales: 56800.00, orders: 335, conversionRate: 5.32 },
-          { marketName: 'NL', sales: 49200.00, orders: 290, conversionRate: 5.27 },
-          { marketName: 'PL', sales: 38700.00, orders: 228, conversionRate: 5.30 },
-          { marketName: 'BE', sales: 28314.00, orders: 167, conversionRate: 5.22 }
-        ]
-      }
-    ];
+  formatUtcDateTime(d) {
+    const pad = n => String(n).padStart(2, '0');
+    return `${d.getUTCFullYear()}-${pad(d.getUTCMonth() + 1)}-${pad(d.getUTCDate())} ${pad(d.getUTCHours())}:${pad(d.getUTCMinutes())}:${pad(d.getUTCSeconds())}`;
+  }
 
-    this.currentData = this.calculateAggregates(this.rawStores);
+  formatDateTime(d) {
+    return this.formatUtcDateTime(d);
   }
 
   /**
-   * 标准化后端数据结构，支持后端返回的字段规范：
-   * - storeId: 12
-   * - storeName: "测试店铺1"
-   * - storeType: "1" (1: 品牌站, 2: 泛欧站)
-   * - markets: [{ marketId: 22, marketName: "市场1", orderCount: 1, orderAmount: 32323, conversionRate: 5.34 }]
+   * 生成大促默认时间范围 (基于 UTC)：
+   * 截止时间：次日 00:00:00 (如 2026-10-30 00:00:00 UTC)
+   * 起始时间：向前推 10 天 00:00:00 (如 2026-10-20 00:00:00 UTC)
+   */
+  getDefaultTimeRange() {
+    const now = new Date();
+    const end = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 1, 0, 0, 0));
+    const begin = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() - 9, 0, 0, 0));
+    return {
+      payTimeBegin: this.formatUtcDateTime(begin),
+      payTimeEnd: this.formatUtcDateTime(end)
+    };
+  }
+
+  /**
+   * 切换快捷预设时间周期 (严格按 UTC 维度统计)
+   * @param {'campaign' | 'today' | '7d' | '30d'} preset
+   */
+  setTimePreset(preset = 'campaign') {
+    const now = new Date();
+    if (preset === 'today') {
+      // UTC 今日 00:00:00 至次日 00:00:00
+      const begin = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 0, 0, 0));
+      const end = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 1, 0, 0, 0));
+      this.payTimeBegin = this.formatUtcDateTime(begin);
+      this.payTimeEnd = this.formatUtcDateTime(end);
+    } else if (preset === '7d') {
+      // UTC 近 7 天
+      const begin = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() - 6, 0, 0, 0));
+      const end = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 1, 0, 0, 0));
+      this.payTimeBegin = this.formatUtcDateTime(begin);
+      this.payTimeEnd = this.formatUtcDateTime(end);
+    } else if (preset === '30d') {
+      // UTC 近 30 天
+      const begin = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() - 29, 0, 0, 0));
+      const end = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 1, 0, 0, 0));
+      this.payTimeBegin = this.formatUtcDateTime(begin);
+      this.payTimeEnd = this.formatUtcDateTime(end);
+    } else {
+      // 默认大促周期 (2026-10-20 ~ 2026-10-30 UTC)
+      this.payTimeBegin = '2026-10-20 00:00:00';
+      this.payTimeEnd = '2026-10-30 00:00:00';
+    }
+    return this.fetchRealData();
+  }
+
+  /**
+   * 设置自定义时间范围并重新请求
+   */
+  setTimeRange(begin, end) {
+    if (begin) this.payTimeBegin = begin.trim();
+    if (end) this.payTimeEnd = end.trim();
+    return this.fetchRealData();
+  }
+
+  /**
+   * 设置店铺 IDs 列表并重新请求
+   */
+  setStoreIds(storeIds) {
+    if (storeIds) this.storeIds = String(storeIds).trim();
+    return this.fetchRealData();
+  }
+
+  /**
+   * 发起真实后端接口请求
+   */
+  async fetchRealData() {
+    try {
+      const url = new URL(this.apiBaseUrl);
+      url.searchParams.set('storeIds', this.storeIds);
+      url.searchParams.set('payTimeBegin', this.payTimeBegin);
+      url.searchParams.set('payTimeEnd', this.payTimeEnd);
+
+      const res = await fetch(url.toString(), {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json'
+        }
+      });
+
+      if (!res.ok) {
+        throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+      }
+
+      const json = await res.json();
+      if (json && json.code === 200 && Array.isArray(json.data)) {
+        this.rawStores = json.data;
+        this.isUsingRealApi = true;
+        this.lastFetchError = null;
+        this.lastFetchTime = new Date();
+        this.currentData = this.calculateAggregates(this.rawStores);
+        this.notify();
+        return this.currentData;
+      } else {
+        throw new Error(json?.msg || '后端返回异常状态码');
+      }
+    } catch (err) {
+      console.warn('[DataService] 真实接口拉取失败，启用平滑保持与容灾兜底:', err);
+      this.lastFetchError = err.message;
+      if (!this.currentData) {
+        this.initFallbackStores();
+      }
+      return this.currentData;
+    }
+  }
+
+  /**
+   * 标准化后端数据结构
    */
   normalizeBackendData(data) {
     if (!Array.isArray(data)) return [];
-    return data.map(store => {
+    return data.map((store, sIdx) => {
       const isBrand = String(store.storeType || store.type) === '1' || store.type === 'brand';
       const type = isBrand ? 'brand' : 'pan_eu';
       const category = isBrand ? '品牌站' : '泛欧站';
 
       const markets = (store.markets || []).map(m => {
-        const sales = Number(m.orderAmount !== undefined ? m.orderAmount : (m.sales || 0));
-        const orders = Number(m.orderCount !== undefined ? m.orderCount : (m.orders || 0));
-        // 后端直接提供的单市场转化率 (例如 5.34 代表 5.34%)
+        // 兼容字符串金额 (如 "128167") 或数字金额
+        const sales = parseFloat(m.orderAmount !== undefined ? m.orderAmount : (m.sales || 0)) || 0;
+        const orders = parseInt(m.orderCount !== undefined ? m.orderCount : (m.orders || 0), 10) || 0;
+        // 转化率 (若后端提供 0 则展示 0，若提供实际转化率则展示)
         const convRate = Number(
           m.conversionRate !== undefined
             ? m.conversionRate
-            : (m.conversion !== undefined ? m.conversion : 5.2)
+            : (m.conversion !== undefined ? m.conversion : 0)
         );
+
+        // 提取国家二字码 (如 "DE德国" -> code: "DE")
+        const codeMatch = String(m.marketName || '').match(/^([A-Za-z]{2})/);
+        const code = codeMatch ? codeMatch[1].toUpperCase() : (m.marketName || 'Unknown');
+        const meta = (window.COUNTRY_MARKETS && window.COUNTRY_MARKETS[code]) || {};
 
         return {
           marketId: m.marketId,
-          marketName: m.marketName || m.country || 'Unknown',
+          marketCode: code,
+          marketName: m.marketName || code,
+          flag: meta.flag || '🌐',
           sales,
           orders,
           conversionRate: convRate,
@@ -129,9 +202,9 @@ class DataService {
       });
 
       return {
-        storeId: String(store.storeId || store.storeName),
-        storeName: store.storeName,
-        storeType: store.storeType || (isBrand ? '1' : '2'),
+        storeId: String(store.storeId !== undefined ? store.storeId : sIdx + 1),
+        storeName: store.storeName || `店铺 ${store.storeId}`,
+        storeType: String(store.storeType || (isBrand ? '1' : '2')),
         type,
         category,
         markets
@@ -140,7 +213,7 @@ class DataService {
   }
 
   /**
-   * 前端核心计算引擎 (按照用户要求：总销售额和店铺总额由前端自动计算)
+   * 前端核心汇总与指标计算引擎
    */
   calculateAggregates(rawStores) {
     const normalizedStores = this.normalizeBackendData(rawStores);
@@ -186,10 +259,9 @@ class DataService {
       }
 
       const storeAov = storeOrders > 0 ? (storeSales / storeOrders) : 0;
-      // 店铺总转化率：根据各市场订单量加权合并 (若订单为0则取简单平均)
       const storeConv = storeOrders > 0
         ? (storeWeightedConvSum / storeOrders)
-        : (markets.length > 0 ? markets.reduce((acc, cur) => acc + cur.conversionRate, 0) / markets.length : 5.0);
+        : (markets.length > 0 ? markets.reduce((acc, cur) => acc + cur.conversionRate, 0) / markets.length : 0);
 
       return {
         ...store,
@@ -202,7 +274,6 @@ class DataService {
       };
     });
 
-    // 计算各店铺/市场的占比
     computedStores.forEach(s => {
       s.sharePercent = amsTotalSales > 0 ? ((s.storeSales / amsTotalSales) * 100).toFixed(1) : '0.0';
       s.markets.forEach(m => {
@@ -210,18 +281,25 @@ class DataService {
       });
     });
 
-    // 计算最高营收店铺 (Leading Store)
+    // 计算领跑最高店铺
     const sortedBySales = [...computedStores].sort((a, b) => b.storeSales - a.storeSales);
-    const leadingStore = sortedBySales[0] || computedStores[0];
+    const leadingStore = sortedBySales[0] || (computedStores[0] || { storeName: '-', storeSales: 0 });
 
-    // 全站平均客单价与转化率 (转化率由各市场加权计算)
     const amsAov = amsTotalOrders > 0 ? (amsTotalSales / amsTotalOrders) : 0;
-    const amsConversion = amsTotalOrders > 0 ? (amsWeightedConvSum / amsTotalOrders) : 5.34;
-    // 每小时估算流水 (Combined Run-Rate)
+    const amsConversion = amsTotalOrders > 0 ? (amsWeightedConvSum / amsTotalOrders) : 0;
     const hourlyRunRate = Math.round(amsTotalSales * 0.142);
 
     return {
       timestamp: new Date(),
+      isRealApi: this.isUsingRealApi,
+      apiInfo: {
+        endpoint: this.apiBaseUrl,
+        storeIds: this.storeIds,
+        payTimeBegin: this.payTimeBegin,
+        payTimeEnd: this.payTimeEnd,
+        lastFetchTime: this.lastFetchTime,
+        lastError: this.lastFetchError
+      },
       amsTotalSales,
       amsTotalOrders,
       amsAov,
@@ -250,27 +328,31 @@ class DataService {
   }
 
   /**
-   * 10秒脉冲模拟波动 (模拟双11/黑五实时下单增量)
+   * 容灾兜底基础数据
    */
-  pulseMockData() {
-    this.rawStores.forEach(store => {
-      store.markets.forEach(m => {
-        // 随机产生 1~4 单新订单
-        const newOrders = Math.floor(Math.random() * 4) + 1;
-        // 平均客单价在 80~180 美元波动
-        const incrementalSales = newOrders * (90 + Math.random() * 85);
-
-        m.orders = (m.orders || 0) + newOrders;
-        m.sales = Math.round(((m.sales || 0) + incrementalSales) * 100) / 100;
-        if (m.conversionRate) {
-          const delta = (Math.random() - 0.5) * 0.02;
-          m.conversionRate = Math.round((m.conversionRate + delta) * 100) / 100;
-        }
-      });
-    });
+  initFallbackStores() {
+    this.rawStores = [
+      {
+        storeId: 2,
+        storeName: 'AMB店铺002',
+        storeType: '1',
+        markets: [
+          { marketId: 3, marketName: 'DE德国', orderCount: 5, orderAmount: 128167, conversionRate: 0 }
+        ]
+      },
+      {
+        storeId: 12,
+        storeName: '泛欧数据迁移店铺不要动',
+        storeType: '2',
+        markets: [
+          { marketId: 47, marketName: 'FI 芬兰', orderCount: 30, orderAmount: 533338, conversionRate: 0 },
+          { marketId: 33, marketName: 'GR 希腊', orderCount: 57, orderAmount: 787537, conversionRate: 0 },
+          { marketId: 37, marketName: 'BG 保加利亚', orderCount: 1, orderAmount: 3648, conversionRate: 0 }
+        ]
+      }
+    ];
 
     this.currentData = this.calculateAggregates(this.rawStores);
-    this.notify();
   }
 
   /**
@@ -296,15 +378,17 @@ class DataService {
   }
 
   /**
-   * 启动10秒后台轮询
+   * 启动 10 秒定时后台静默轮询
    */
   startPolling() {
     if (this.timer) clearInterval(this.timer);
 
+    // 页面加载后立即发起一次真实后端请求
+    this.fetchRealData();
+
+    // 每 10 秒轮询一次
     this.timer = setInterval(() => {
-      // 如果未来后端接口准备好了，可以在此发起 fetch(this.apiEndpoint)
-      // 当前使用符合新协议的 Mock 引擎
-      this.pulseMockData();
+      this.fetchRealData();
     }, this.pollInterval * 1000);
   }
 

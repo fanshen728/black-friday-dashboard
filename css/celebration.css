@@ -507,3 +507,166 @@
     font-size: 32px;
   }
 }
+
+/* ================== API 实时状态与时间周期控制条 ================== */
+.section-meta-header {
+  display: flex !important;
+  flex-direction: row !important;
+  justify-content: space-between !important;
+  align-items: flex-end !important;
+  margin-bottom: 12px !important;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.meta-title-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.api-time-control-capsule {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(15, 23, 42, 0.75);
+  border: 1px solid rgba(59, 130, 246, 0.35);
+  padding: 4px 12px;
+  border-radius: 20px;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+.api-status-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #34d399;
+}
+
+.api-status-badge.error {
+  color: #ef4444;
+}
+
+.api-status-badge .pulse-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #34d399;
+  box-shadow: 0 0 8px #34d399;
+  animation: pulseApiDot 1.5s infinite;
+}
+
+.api-status-badge.error .pulse-dot {
+  background: #ef4444;
+  box-shadow: 0 0 8px #ef4444;
+}
+
+@keyframes pulseApiDot {
+  0% { transform: scale(0.9); opacity: 0.7; }
+  50% { transform: scale(1.3); opacity: 1; }
+  100% { transform: scale(0.9); opacity: 0.7; }
+}
+
+.time-range-display {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono, monospace);
+  font-size: 11px;
+  font-weight: 600;
+  color: #93c5fd;
+  border-left: 1px solid rgba(255, 255, 255, 0.15);
+  border-right: 1px solid rgba(255, 255, 255, 0.15);
+  padding: 0 10px;
+}
+
+.time-preset-pills {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.preset-pill {
+  padding: 2px 9px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #94a3b8;
+  border: 1px solid transparent;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.preset-pill:hover {
+  color: #ffffff;
+  background: rgba(59, 130, 246, 0.2);
+}
+
+.preset-pill.active {
+  color: #ffffff;
+  background: #2563eb;
+  border-color: rgba(59, 130, 246, 0.6);
+  box-shadow: 0 2px 6px rgba(37, 99, 235, 0.4);
+}
+
+/* 隐藏底部操作板与指标卡片 (纯粹 3D 沉浸式视效) */
+.celebration-bottom-group,
+.milestone-tier-switcher,
+.celebration-metrics-board,
+.celebration-actions-row,
+.milestone-trigger-btn {
+  display: none !important;
+}
+
+/* 右上角悬浮关闭小按钮 */
+.celebration-floating-close-btn {
+  position: absolute;
+  top: 24px;
+  right: 28px;
+  z-index: 1000;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(15, 23, 42, 0.65);
+  color: #94a3b8;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  backdrop-filter: blur(8px);
+}
+
+.celebration-floating-close-btn:hover {
+  background: rgba(239, 68, 68, 0.35);
+  border-color: rgba(239, 68, 68, 0.6);
+  color: #ffffff;
+  transform: scale(1.08);
+}
+
+/* 底部轻量退出提示 */
+.celebration-floating-hint {
+  position: absolute;
+  bottom: 28px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.45);
+  letter-spacing: 1px;
+  pointer-events: none;
+  animation: pulseHintFade 3s ease-in-out infinite;
+}
+
+@keyframes pulseHintFade {
+  0%, 100% { opacity: 0.35; transform: translateX(-50%) scale(0.98); }
+  50% { opacity: 0.8; transform: translateX(-50%) scale(1.02); }
+}
+
+

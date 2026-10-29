@@ -44,10 +44,6 @@
           <a href="../version-cyberpunk/index.html" class="theme-pill-btn" data-i18n="themePillCyber">🌌 赛博朋克</a>
         </div>
 
-        <button id="milestoneDemoBtn" class="milestone-trigger-btn" onclick="window.triggerMilestoneFx && window.triggerMilestoneFx()" title="演示销量突破烟花粒子特效">
-          <span class="trigger-icon">🎉</span> <span data-i18n="milestoneFxBtn">突破特效</span>
-        </button>
-
         <button id="fullscreenToggleBtn" class="fullscreen-btn" title="全屏切换">
           <span>⛶</span> <span data-i18n="fullscreen">全屏</span>
         </button>
@@ -60,8 +56,27 @@
       <!-- ================== Section 1: GLOBAL PERFORMANCE (全店铺营收与订单分析) ================== -->
       <section class="dashboard-section">
         <div class="section-meta-header">
-          <span class="section-label" data-i18n="globalPerfLabel">全局业绩监控</span>
-          <h2 class="section-title" data-i18n="globalPerfTitle">实时销售与订单综合分析</h2>
+          <div class="meta-title-group">
+            <span class="section-label" data-i18n="globalPerfLabel">全局业绩监控</span>
+            <h2 class="section-title" data-i18n="globalPerfTitle">实时销售与订单综合分析</h2>
+          </div>
+          <!-- 真实后端接口与大促周期控制条 -->
+          <div class="api-time-control-capsule">
+            <div class="api-status-badge" id="apiStatusBadge" title="https://amsbff.admindev.aosom.com/platform/oms/saleOrderBoard/statistics">
+              <span class="pulse-dot"></span>
+              <span class="api-status-text" id="apiStatusText">BFF 实时连接</span>
+            </div>
+            <div class="time-range-display" id="timeRangeDisplay" title="当前查询周期 payTimeBegin ~ payTimeEnd">
+              <span class="time-range-icon">📅</span>
+              <span id="currentTimeRangeText">2026-10-20 ~ 2026-10-30</span>
+            </div>
+            <div class="time-preset-pills">
+              <button type="button" class="preset-pill active" data-preset="campaign" title="黑五大促周期：2026-10-20 00:00:00 ~ 2026-10-30 00:00:00">黑五大促</button>
+              <button type="button" class="preset-pill" data-preset="today" title="今日实时数据">今日</button>
+              <button type="button" class="preset-pill" data-preset="7d" title="近 7 天数据">近7天</button>
+              <button type="button" class="preset-pill" data-preset="30d" title="近 30 天数据">近30天</button>
+            </div>
+          </div>
         </div>
 
         <div class="global-performance-grid">
@@ -82,7 +97,7 @@
               <span class="kpi-title-text" data-i18n="totalOrdersProcessed">全店铺订单总量</span>
             </div>
             <div class="orders-master-num" id="globalTotalOrders">0</div>
-            <div class="orders-sub-note" data-i18n="ordersCompletedNote">全站店铺合计 ↗ 21.4%</div>
+            <div class="orders-sub-note" data-i18n="ordersCompletedNote">● 实时汇聚：全站店铺汇总</div>
 
             <div class="sub-metrics-split-row">
               <!-- 全店铺客单价 (订单金额/订单量) -->

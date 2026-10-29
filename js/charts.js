@@ -92,9 +92,20 @@ class DashboardCharts {
     return THEME_CONFIGS[cur] || THEME_CONFIGS['business-blue'];
   }
 
-  getStoreColor(storeName) {
+  getStoreColor(storeName, index = 0) {
     const cfg = this.getThemeConfig();
-    return (cfg.storeColors && cfg.storeColors[storeName]) || '#3b82f6';
+    if (cfg.storeColors && cfg.storeColors[storeName]) {
+      return cfg.storeColors[storeName];
+    }
+    const curTheme = window.ACTIVE_THEME || document.documentElement.dataset.theme || this.theme || 'business-blue';
+    const palettes = {
+      'business-blue': ['#3b82f6', '#8b5cf6', '#06b6d4', '#f59e0b', '#10b981', '#ec4899'],
+      'black-gold': ['#fbbf24', '#f43f5e', '#10b981', '#d97706', '#a855f7', '#38bdf8'],
+      'minimal-slate': ['#38bdf8', '#818cf8', '#34d399', '#fb923c', '#f43f5e', '#a78bfa'],
+      'cyberpunk': ['#00f0ff', '#7000ff', '#00ff88', '#ffb703', '#ff007f', '#38bdf8']
+    };
+    const list = palettes[curTheme] || palettes['business-blue'];
+    return list[index % list.length];
   }
 
   setTheme(themeName) {
@@ -149,8 +160,8 @@ class DashboardCharts {
 
     // 4 个店铺名称与销售额
     const xNames = data.stores.map(s => s.storeName);
-    const seriesData = data.stores.map(store => {
-      const sColor = this.getStoreColor(store.storeName);
+    const seriesData = data.stores.map((store, idx) => {
+      const sColor = this.getStoreColor(store.storeName, idx);
       return {
         value: store.storeSales,
         itemStyle: {
@@ -271,8 +282,8 @@ class DashboardCharts {
     const sorted = [...filteredStores].sort((a, b) => a.storeSales - b.storeSales);
     const yNames = sorted.map(s => s.storeName);
     const seriesValues = sorted.map(s => s.storeSales);
-    const seriesData = sorted.map(s => {
-      const sColor = this.getStoreColor(s.storeName);
+    const seriesData = sorted.map((s, idx) => {
+      const sColor = this.getStoreColor(s.storeName, idx);
       return {
         value: s.storeSales,
         itemStyle: {
@@ -301,7 +312,7 @@ class DashboardCharts {
           return `<b>${item.name}</b><br/>${tRev}: <b style="color:#fbbf24;">$ ${Number(item.value).toLocaleString()}</b>`;
         }
       },
-      grid: { top: 15, left: 110, right: 90, bottom: 20 },
+      grid: { top: 15, left: 180, right: 90, bottom: 20 },
       xAxis: {
         type: 'value',
         show: false
