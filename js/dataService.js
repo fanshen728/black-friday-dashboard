@@ -32,57 +32,61 @@ class DataService {
       {
         storeId: 'homcomstore',
         storeName: 'HOMCOM Store',
-        type: 'brand', // 品牌站
+        storeType: '1', // 品牌站
+        type: 'brand',
         category: '品牌站',
         icon: '🏠',
         colorKey: 'homcomstore',
         markets: [
-          { marketName: 'US', sales: 684200.50, orders: 4410, traffic: 82000 },
-          { marketName: 'UK', sales: 412300.20, orders: 2680, traffic: 51000 },
-          { marketName: 'CA', sales: 279622.95, orders: 1780, traffic: 34000 }
+          { marketName: 'US', sales: 684200.50, orders: 4410, conversionRate: 5.38 },
+          { marketName: 'UK', sales: 412300.20, orders: 2680, conversionRate: 5.25 },
+          { marketName: 'CA', sales: 279622.95, orders: 1780, conversionRate: 5.23 }
         ]
       },
       {
         storeId: 'outsunny_fr',
         storeName: 'Outsunny FR',
-        type: 'brand', // 品牌站
+        storeType: '1', // 品牌站
+        type: 'brand',
         category: '品牌站',
         icon: '⛺',
         colorKey: 'outsunny.fr',
         markets: [
-          { marketName: 'FR', sales: 648900.40, orders: 4450, traffic: 83000 },
-          { marketName: 'BE', sales: 181704.00, orders: 1232, traffic: 23000 }
+          { marketName: 'FR', sales: 648900.40, orders: 4450, conversionRate: 5.36 },
+          { marketName: 'BE', sales: 181704.00, orders: 1232, conversionRate: 5.35 }
         ]
       },
       {
         storeId: 'homcom_fr',
         storeName: 'HOMCOM FR',
-        type: 'brand', // 品牌站
+        storeType: '1', // 品牌站
+        type: 'brand',
         category: '品牌站',
         icon: '🛋️',
         colorKey: 'homcom.fr',
         markets: [
-          { marketName: 'FR', sales: 751949.00, orders: 4396, traffic: 82300 }
+          { marketName: 'FR', sales: 751949.00, orders: 4396, conversionRate: 5.34 }
         ]
       },
       {
         storeId: 'aosom_eu',
         storeName: 'AOSOM EU',
-        type: 'pan_eu', // 泛欧站
+        storeType: '2', // 泛欧站
+        type: 'pan_eu',
         category: '泛欧站',
         icon: '🇪🇺',
         colorKey: 'aosom.eu',
         markets: [
-          { marketName: 'DE', sales: 325400.00, orders: 1920, traffic: 36000 },
-          { marketName: 'UK', sales: 248600.00, orders: 1460, traffic: 27000 },
-          { marketName: 'FR', sales: 186300.00, orders: 1100, traffic: 21000 },
-          { marketName: 'ES', sales: 142100.00, orders: 840, traffic: 16000 },
-          { marketName: 'IT', sales: 118400.00, orders: 700, traffic: 13000 },
-          { marketName: 'PT', sales: 76500.00, orders: 450, traffic: 8500 },
-          { marketName: 'IE', sales: 56800.00, orders: 335, traffic: 6300 },
-          { marketName: 'NL', sales: 49200.00, orders: 290, traffic: 5500 },
-          { marketName: 'PL', sales: 38700.00, orders: 228, traffic: 4300 },
-          { marketName: 'BE', sales: 28314.00, orders: 167, traffic: 3200 }
+          { marketName: 'DE', sales: 325400.00, orders: 1920, conversionRate: 5.33 },
+          { marketName: 'UK', sales: 248600.00, orders: 1460, conversionRate: 5.41 },
+          { marketName: 'FR', sales: 186300.00, orders: 1100, conversionRate: 5.24 },
+          { marketName: 'ES', sales: 142100.00, orders: 840, conversionRate: 5.25 },
+          { marketName: 'IT', sales: 118400.00, orders: 700, conversionRate: 5.38 },
+          { marketName: 'PT', sales: 76500.00, orders: 450, conversionRate: 5.29 },
+          { marketName: 'IE', sales: 56800.00, orders: 335, conversionRate: 5.32 },
+          { marketName: 'NL', sales: 49200.00, orders: 290, conversionRate: 5.27 },
+          { marketName: 'PL', sales: 38700.00, orders: 228, conversionRate: 5.30 },
+          { marketName: 'BE', sales: 28314.00, orders: 167, conversionRate: 5.22 }
         ]
       }
     ];
@@ -95,7 +99,7 @@ class DataService {
    * - storeId: 12
    * - storeName: "测试店铺1"
    * - storeType: "1" (1: 品牌站, 2: 泛欧站)
-   * - markets: [{ marketId: 22, marketName: "市场1", orderCount: 1, orderAmount: 32323 }]
+   * - markets: [{ marketId: 22, marketName: "市场1", orderCount: 1, orderAmount: 32323, conversionRate: 5.34 }]
    */
   normalizeBackendData(data) {
     if (!Array.isArray(data)) return [];
@@ -107,14 +111,20 @@ class DataService {
       const markets = (store.markets || []).map(m => {
         const sales = Number(m.orderAmount !== undefined ? m.orderAmount : (m.sales || 0));
         const orders = Number(m.orderCount !== undefined ? m.orderCount : (m.orders || 0));
-        const traffic = Number(m.trafficCount || m.visitorCount || m.traffic || (orders > 0 ? orders * 18 : 100));
+        // 后端直接提供的单市场转化率 (例如 5.34 代表 5.34%)
+        const convRate = Number(
+          m.conversionRate !== undefined
+            ? m.conversionRate
+            : (m.conversion !== undefined ? m.conversion : 5.2)
+        );
 
         return {
           marketId: m.marketId,
           marketName: m.marketName || m.country || 'Unknown',
           sales,
           orders,
-          traffic
+          conversionRate: convRate,
+          conversion: convRate
         };
       });
 
@@ -136,7 +146,7 @@ class DataService {
     const normalizedStores = this.normalizeBackendData(rawStores);
     let amsTotalSales = 0;
     let amsTotalOrders = 0;
-    let amsTotalTraffic = 0;
+    let amsWeightedConvSum = 0;
 
     let brandTotalSales = 0;
     let brandTotalOrders = 0;
@@ -146,15 +156,15 @@ class DataService {
     const computedStores = normalizedStores.map(store => {
       let storeSales = 0;
       let storeOrders = 0;
-      let storeTraffic = 0;
+      let storeWeightedConvSum = 0;
 
       const markets = store.markets.map(m => {
         storeSales += m.sales;
         storeOrders += m.orders;
-        storeTraffic += (m.traffic || m.orders * 18);
+        storeWeightedConvSum += (m.conversionRate * m.orders);
 
         const aov = m.orders > 0 ? (m.sales / m.orders) : 0;
-        const conv = m.traffic > 0 ? ((m.orders / m.traffic) * 100) : 5.0;
+        const conv = m.conversionRate;
 
         return {
           ...m,
@@ -165,7 +175,7 @@ class DataService {
 
       amsTotalSales += storeSales;
       amsTotalOrders += storeOrders;
-      amsTotalTraffic += storeTraffic;
+      amsWeightedConvSum += storeWeightedConvSum;
 
       if (store.type === 'brand') {
         brandTotalSales += storeSales;
@@ -176,14 +186,16 @@ class DataService {
       }
 
       const storeAov = storeOrders > 0 ? (storeSales / storeOrders) : 0;
-      const storeConv = storeTraffic > 0 ? ((storeOrders / storeTraffic) * 100) : 5.2;
+      // 店铺总转化率：根据各市场订单量加权合并 (若订单为0则取简单平均)
+      const storeConv = storeOrders > 0
+        ? (storeWeightedConvSum / storeOrders)
+        : (markets.length > 0 ? markets.reduce((acc, cur) => acc + cur.conversionRate, 0) / markets.length : 5.0);
 
       return {
         ...store,
         markets,
         storeSales,
         storeOrders,
-        storeTraffic,
         storeAov,
         storeConversion: storeConv,
         marketCount: markets.length
@@ -202,9 +214,9 @@ class DataService {
     const sortedBySales = [...computedStores].sort((a, b) => b.storeSales - a.storeSales);
     const leadingStore = sortedBySales[0] || computedStores[0];
 
-    // 全站平均客单价与转化率
+    // 全站平均客单价与转化率 (转化率由各市场加权计算)
     const amsAov = amsTotalOrders > 0 ? (amsTotalSales / amsTotalOrders) : 0;
-    const amsConversion = amsTotalTraffic > 0 ? ((amsTotalOrders / amsTotalTraffic) * 100) : 5.34;
+    const amsConversion = amsTotalOrders > 0 ? (amsWeightedConvSum / amsTotalOrders) : 5.34;
     // 每小时估算流水 (Combined Run-Rate)
     const hourlyRunRate = Math.round(amsTotalSales * 0.142);
 
@@ -212,7 +224,6 @@ class DataService {
       timestamp: new Date(),
       amsTotalSales,
       amsTotalOrders,
-      amsTotalTraffic,
       amsAov,
       amsConversion,
       hourlyRunRate,
@@ -249,9 +260,12 @@ class DataService {
         // 平均客单价在 80~180 美元波动
         const incrementalSales = newOrders * (90 + Math.random() * 85);
 
-        m.orders += newOrders;
-        m.sales = Math.round((m.sales + incrementalSales) * 100) / 100;
-        m.traffic += newOrders * (15 + Math.floor(Math.random() * 10));
+        m.orders = (m.orders || 0) + newOrders;
+        m.sales = Math.round(((m.sales || 0) + incrementalSales) * 100) / 100;
+        if (m.conversionRate) {
+          const delta = (Math.random() - 0.5) * 0.02;
+          m.conversionRate = Math.round((m.conversionRate + delta) * 100) / 100;
+        }
       });
     });
 
