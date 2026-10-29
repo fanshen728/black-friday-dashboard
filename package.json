@@ -1,0 +1,19 @@
+{
+  "name": "ams-blackfriday-sales-dashboard",
+  "version": "1.0.0",
+  "description": "AMS 黑五全球电商大屏实时销量看板 - 4大店铺与多市场可视化",
+  "scripts": {
+    "dev": "npx serve -l 3000 .",
+    "serve": "npx serve -l 3000 .",
+    "start": "npx serve -l 3000 ."
+  },
+  "keywords": [
+    "datav",
+    "echarts",
+    "black-friday",
+    "dashboard",
+    "sales-cockpit"
+  ],
+  "author": "Antigravity",
+  "license": "MIT"
+}

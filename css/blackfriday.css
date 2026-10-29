@@ -1,0 +1,898 @@
+@charset "utf-8";
+
+/* ==========================================================================
+   AMS 全球电商黑五销量大屏看板 - 专属科技视觉样式表
+   Design Language: Deep Space Cyber HUD, Neon Cyan & Electric Blue Glow
+   ========================================================================== */
+
+:root {
+  --bg-dark-base: #04091e;
+  --bg-card: rgba(6, 18, 48, 0.42);
+  --bg-card-hover: rgba(12, 32, 74, 0.65);
+  --border-cyan: rgba(0, 240, 255, 0.45);
+  --border-glow: 0 0 16px rgba(0, 240, 255, 0.35);
+  --text-cyan-bright: #bef2ff;
+  --text-cyan-neon: #00f0ff;
+  --text-muted: #7fa4cb;
+  --accent-gold: #ffb703;
+  --accent-green: #00ff88;
+  --accent-blue: #0088ff;
+  --font-mono: 'DIN Alternate', 'Roboto Mono', 'SF Pro Display', Consolas, monospace;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  min-width: 1280px;
+  min-height: 720px;
+  overflow: hidden;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  background-color: var(--bg-dark-base);
+  color: #fff;
+  user-select: none;
+}
+
+/* ================== 全局科技星空与粒子波浪背景 ================== */
+.dashboard-screen {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: url("../img/dashboard-bg.jpg") center center / cover no-repeat, #03081a;
+  overflow: hidden;
+}
+
+/* 微妙科技扫描线特效 (可选轻量层) */
+.dashboard-screen::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.08) 50%);
+  background-size: 100% 4px;
+  pointer-events: none;
+  z-index: 999;
+}
+
+/* ================== 顶部科技 Header (复刻图一上部) ================== */
+.dashboard-header {
+  position: relative;
+  height: 96px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  border-bottom: 1px solid rgba(0, 240, 255, 0.25);
+  background: linear-gradient(180deg, rgba(6, 18, 48, 0.65) 0%, rgba(4, 12, 34, 0.35) 100%);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 10;
+}
+
+/* 顶部中间发光修饰梁 */
+.header-top-accent {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 580px;
+  height: 4px;
+  background: linear-gradient(90deg, transparent, #00f0ff, #fff, #00f0ff, transparent);
+  box-shadow: 0 0 18px #00f0ff;
+}
+
+/* Header 左右与中间布局优化 */
+.header-left-zone {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-shrink: 0;
+  z-index: 12;
+}
+
+.globe-wrapper {
+  position: relative;
+  width: 76px;
+  height: 76px;
+  flex-shrink: 0;
+}
+
+#earthGlobeCanvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.tech-clock-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 12px;
+  background: rgba(0, 180, 255, 0.08);
+  border: 1px solid rgba(0, 240, 255, 0.4);
+  border-radius: 4px;
+  font-family: var(--font-mono);
+  font-size: 14px;
+  color: var(--text-cyan-bright);
+  box-shadow: inset 0 0 10px rgba(0, 240, 255, 0.15);
+  white-space: nowrap;
+}
+
+.tech-lines {
+  color: rgba(0, 240, 255, 0.6);
+  letter-spacing: -2px;
+  font-weight: bold;
+}
+
+/* Header 中间：AMS 总销售额超大数字翻牌器与发光舞台 (图一精髓) */
+.header-center-zone {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  z-index: 11;
+  pointer-events: auto;
+}
+
+.ams-title-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 2px;
+}
+
+.ams-header-title {
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  color: #fff;
+  text-shadow: 0 0 12px rgba(0, 240, 255, 0.7);
+}
+
+.bf-tag {
+  padding: 2px 7px;
+  background: linear-gradient(90deg, #ff0055, #ff5500);
+  border-radius: 3px;
+  font-size: 10px;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: 1px;
+  box-shadow: 0 0 10px rgba(255, 0, 85, 0.6);
+}
+
+/* 数字翻牌器框体 (复刻图一 $ 37, 601 样式) */
+.ams-counter-stage {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 2px 16px 8px 16px;
+}
+
+.ams-flip-counter {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.digit-box {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 36px;
+  height: 48px;
+  padding: 0 4px;
+  font-family: var(--font-mono);
+  font-size: 32px;
+  font-weight: 800;
+  color: #ffffff;
+  background: linear-gradient(180deg, rgba(16, 44, 94, 0.95) 0%, rgba(6, 21, 56, 0.95) 100%);
+  border: 1px solid rgba(0, 240, 255, 0.65);
+  border-radius: 5px;
+  box-shadow: 
+    0 4px 12px rgba(0, 0, 0, 0.5),
+    inset 0 0 8px rgba(0, 240, 255, 0.35),
+    0 0 10px rgba(0, 240, 255, 0.3);
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.85);
+  position: relative;
+  overflow: hidden;
+}
+
+/* 翻牌器中间微横线 (模拟物理翻牌机构缝隙) */
+.digit-box::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: rgba(0, 0, 0, 0.45);
+  box-shadow: 0 1px 0 rgba(0, 240, 255, 0.2);
+}
+
+.digit-box.digit-symbol {
+  font-size: 26px;
+  color: var(--text-cyan-neon);
+  border-color: rgba(0, 240, 255, 0.8);
+}
+
+.digit-box.digit-comma {
+  min-width: 16px;
+  font-size: 26px;
+  color: var(--text-cyan-bright);
+  background: transparent;
+  border: none;
+  box-shadow: none;
+}
+
+.digit-box.digit-comma::after {
+  display: none;
+}
+
+.digit-separator-space {
+  width: 6px;
+}
+
+/* 发光 3D 悬浮基座底座 (复刻图一数字下方的科技发光平台) */
+.stage-pedestal {
+  position: absolute;
+  bottom: 0px;
+  left: 10px;
+  right: 10px;
+  height: 6px;
+  background: linear-gradient(90deg, transparent, #00d2ff, #00f0ff, #00d2ff, transparent);
+  box-shadow: 0 0 16px #00f0ff, 0 4px 12px rgba(0, 240, 255, 0.4);
+  border-radius: 4px;
+}
+
+/* Header 右区：极简全屏大屏切换按钮 */
+.header-right-zone {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+  margin-left: auto;
+  z-index: 12;
+}
+
+.hud-btn-mini {
+  background: rgba(0, 180, 255, 0.12);
+  border: 1px solid rgba(0, 240, 255, 0.45);
+  color: var(--text-cyan-bright);
+  padding: 6px 14px;
+  border-radius: 4px;
+  font-size: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+
+.hud-btn-mini:hover {
+  background: rgba(0, 240, 255, 0.28);
+  box-shadow: 0 0 12px rgba(0, 240, 255, 0.45);
+  color: #fff;
+}
+
+/* ================== 主工作区容器 ================== */
+.dashboard-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 12px 18px 14px 18px;
+  gap: 12px;
+  overflow: hidden;
+}
+
+/* ================== 四大店铺 KPI 横向卡片组 ================== */
+.stores-kpi-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  height: 105px;
+  flex-shrink: 0;
+}
+
+.store-kpi-card {
+  position: relative;
+  background: var(--bg-card);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(0, 240, 255, 0.28);
+  border-radius: 6px;
+  padding: 10px 14px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  overflow: hidden;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+}
+
+.store-kpi-card:hover {
+  background: var(--bg-card-hover);
+  border-color: var(--text-cyan-neon);
+  box-shadow: 0 0 16px rgba(0, 240, 255, 0.28);
+  transform: translateY(-2px);
+}
+
+/* 卡片顶部边角科技小三角形 */
+.store-kpi-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  border-style: solid;
+  border-width: 0 18px 18px 0;
+  border-color: transparent var(--border-cyan) transparent transparent;
+}
+
+.store-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.store-brand-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.store-color-badge {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  box-shadow: 0 0 8px currentColor;
+}
+
+.store-name-text {
+  font-weight: 700;
+  font-size: 15px;
+  letter-spacing: 0.5px;
+  color: #fff;
+}
+
+.store-category-tag {
+  font-size: 10px;
+  padding: 1px 6px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-muted);
+}
+
+.store-share-pill {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-cyan-bright);
+}
+
+.store-card-main-data {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin: 2px 0;
+}
+
+.store-sales-val {
+  font-family: var(--font-mono);
+  font-size: 23px;
+  font-weight: 800;
+  color: #ffffff;
+  text-shadow: 0 0 10px rgba(0, 240, 255, 0.5);
+}
+
+.store-card-footer {
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  padding-top: 6px;
+}
+
+.store-markets-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.market-count-badge {
+  font-size: 11px;
+  color: var(--accent-gold);
+  font-weight: 700;
+  background: rgba(255, 183, 3, 0.14);
+  border: 1px solid rgba(255, 183, 3, 0.4);
+  padding: 1px 7px;
+  border-radius: 3px;
+  white-space: nowrap;
+}
+
+.market-tags-list {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  overflow: hidden;
+}
+
+.market-tag-pill {
+  font-size: 10px;
+  color: #c0deff;
+  background: rgba(0, 180, 255, 0.12);
+  border: 1px solid rgba(0, 240, 255, 0.2);
+  padding: 1px 6px;
+  border-radius: 2px;
+  white-space: nowrap;
+}
+
+/* ================== 下半部分布局 (左主图，右排行与订单) ================== */
+.dashboard-main-grid {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 2.1fr 1fr;
+  gap: 14px;
+  min-height: 0;
+}
+
+/* 科技 HUD 边框卡片通用规范 */
+.hud-card {
+  position: relative;
+  background: var(--bg-card);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(0, 240, 255, 0.3);
+  border-radius: 6px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3), inset 0 0 20px rgba(0, 180, 255, 0.05);
+}
+
+/* 四个科技折角修饰 */
+.hud-corner {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border-color: #00f0ff;
+  border-style: solid;
+  pointer-events: none;
+  z-index: 5;
+}
+.corner-tl { top: -1px; left: -1px; border-width: 2px 0 0 2px; }
+.corner-tr { top: -1px; right: -1px; border-width: 2px 2px 0 0; }
+.corner-bl { bottom: -1px; left: -1px; border-width: 0 0 2px 2px; }
+.corner-br { bottom: -1px; right: -1px; border-width: 0 2px 2px 0; }
+
+.hud-card-header {
+  height: 44px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  border-bottom: 1px solid rgba(0, 240, 255, 0.18);
+  background: rgba(0, 180, 255, 0.04);
+}
+
+.hud-card-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-cyan-bright);
+}
+
+.title-icon-bar {
+  width: 4px;
+  height: 14px;
+  background: var(--text-cyan-neon);
+  box-shadow: 0 0 8px var(--text-cyan-neon);
+  border-radius: 2px;
+}
+
+/* 视图切换 Tab 组 */
+.view-tabs-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.view-tab-btn {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(0, 240, 255, 0.25);
+  color: var(--text-muted);
+  padding: 4px 10px;
+  font-size: 12px;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.view-tab-btn:hover {
+  color: #fff;
+  border-color: var(--text-cyan-neon);
+}
+
+.view-tab-btn.active {
+  background: rgba(0, 240, 255, 0.22);
+  border-color: var(--text-cyan-neon);
+  color: #fff;
+  box-shadow: 0 0 8px rgba(0, 240, 255, 0.35);
+  font-weight: 600;
+}
+
+/* 主图表容器 */
+.hud-card-body {
+  flex: 1;
+  position: relative;
+  min-height: 0;
+  overflow: hidden;
+}
+
+#mainBarChartContainer {
+  width: 100%;
+  height: 100%;
+}
+
+#mainBarChart {
+  width: 100%;
+  height: 100%;
+}
+
+/* 2x2 四分屏独立矩阵容器 */
+#quadViewContainer {
+  display: none;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  gap: 8px;
+  width: 100%;
+  height: 100%;
+  padding: 8px;
+}
+
+.quad-item {
+  position: relative;
+  background: rgba(4, 14, 38, 0.6);
+  border: 1px solid rgba(0, 240, 255, 0.2);
+  border-radius: 4px;
+  display: flex;
+  flex-direction: column;
+}
+
+.quad-item-title {
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 10px;
+  font-size: 11px;
+  font-weight: 700;
+  background: rgba(0, 180, 255, 0.06);
+  border-bottom: 1px solid rgba(0, 240, 255, 0.12);
+}
+
+.quad-chart-canvas {
+  flex: 1;
+  width: 100%;
+  min-height: 0;
+}
+
+/* ================== 右侧边栏：多市场排行榜 + 实时订单流 ================== */
+.dashboard-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 0;
+}
+
+.sidebar-half-card {
+  flex: 1;
+  min-height: 0;
+}
+
+/* 多市场排行榜表格 (科技风) */
+.market-table-wrapper {
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+  padding: 4px 8px;
+}
+
+.market-table-wrapper::-webkit-scrollbar {
+  width: 4px;
+}
+.market-table-wrapper::-webkit-scrollbar-thumb {
+  background: rgba(0, 240, 255, 0.3);
+  border-radius: 2px;
+}
+
+.tech-market-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.tech-market-table th {
+  position: sticky;
+  top: 0;
+  background: rgba(8, 20, 48, 0.98);
+  color: var(--text-muted);
+  font-weight: 600;
+  text-align: left;
+  padding: 6px 8px;
+  border-bottom: 1px solid rgba(0, 240, 255, 0.2);
+  z-index: 2;
+}
+
+.tech-market-table td {
+  padding: 6px 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  color: #dde8f5;
+}
+
+.market-row:hover {
+  background: rgba(0, 240, 255, 0.08);
+}
+
+.col-rank {
+  width: 38px;
+  text-align: center;
+}
+
+.rank-num {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.col-store {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  color: #fff;
+  white-space: nowrap;
+}
+
+.store-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  box-shadow: 0 0 6px currentColor;
+  flex-shrink: 0;
+}
+
+.col-market-name {
+  width: 80px;
+}
+
+.market-name-tag {
+  display: inline-block;
+  padding: 2px 8px;
+  background: rgba(0, 240, 255, 0.12);
+  border: 1px solid rgba(0, 240, 255, 0.4);
+  color: #00f0ff;
+  border-radius: 3px;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 12px;
+  text-align: center;
+}
+
+.col-sales {
+  min-width: 140px;
+}
+
+.val-bar-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.usd-val {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  color: var(--accent-green);
+  font-size: 13px;
+}
+
+.mini-bar-track {
+  width: 100%;
+  height: 3px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.mini-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #00d2ff, #00ff88);
+}
+
+/* 实时订单流水列表 */
+.live-stream-wrapper {
+  width: 100%;
+  height: 100%;
+  overflow-y: hidden;
+  position: relative;
+  padding: 6px 12px;
+}
+
+.live-order-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.order-stream-item {
+  display: grid;
+  grid-template-columns: 55px 75px 65px 1fr 75px;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 8px;
+  background: rgba(0, 180, 255, 0.05);
+  border: 1px solid rgba(0, 240, 255, 0.15);
+  border-radius: 4px;
+  font-size: 11px;
+  transition: all 0.3s ease;
+}
+
+.order-stream-item.enter-active {
+  animation: slide-in-top 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+}
+
+@keyframes slide-in-top {
+  0% { transform: translateY(-16px); opacity: 0; background: rgba(0, 255, 136, 0.25); }
+  100% { transform: translateY(0); opacity: 1; background: rgba(0, 180, 255, 0.05); }
+}
+
+.order-time {
+  font-family: var(--font-mono);
+  color: var(--text-muted);
+}
+
+.order-store {
+  font-weight: 700;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.order-country {
+  color: var(--text-cyan-bright);
+}
+
+.order-item-desc {
+  color: #b5cbe8;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.order-amount {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  color: var(--accent-gold);
+  text-align: right;
+}
+
+/* ================== API 配置弹窗 (Modal) ================== */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(4px);
+  z-index: 1000;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-overlay.show {
+  display: flex;
+}
+
+.modal-card {
+  width: 520px;
+  background: #081738;
+  border: 1px solid #00f0ff;
+  box-shadow: 0 0 30px rgba(0, 240, 255, 0.35);
+  border-radius: 8px;
+  padding: 24px;
+  position: relative;
+}
+
+.modal-title {
+  font-size: 18px;
+  color: var(--text-cyan-bright);
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.modal-form-group {
+  margin-bottom: 14px;
+}
+
+.modal-form-group label {
+  display: block;
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+}
+
+.modal-input {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(0, 240, 255, 0.4);
+  border-radius: 4px;
+  padding: 8px 12px;
+  color: #fff;
+  font-size: 13px;
+  outline: none;
+}
+
+.modal-input:focus {
+  border-color: var(--text-cyan-neon);
+  box-shadow: 0 0 10px rgba(0, 240, 255, 0.4);
+}
+
+.modal-toggle-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 16px 0;
+  font-size: 13px;
+  color: #dde8f5;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.modal-btn-cancel {
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  color: #fff;
+  padding: 6px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.modal-btn-confirm {
+  background: var(--text-cyan-neon);
+  border: none;
+  color: #04091e;
+  font-weight: 700;
+  padding: 6px 18px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+/* ================== 响应式适配 ================== */
+@media (max-width: 1600px) {
+  .dashboard-header { height: 110px; }
+  .ams-header-title { font-size: 18px; }
+  .digit-box { min-width: 32px; height: 44px; font-size: 28px; }
+  .stores-kpi-row { height: 95px; }
+  .store-sales-val { font-size: 20px; }
+}

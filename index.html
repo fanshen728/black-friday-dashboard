@@ -1,118 +1,266 @@
 <!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AMS 销售看板</title>
+  <link rel="stylesheet" href="css/blackfriday.css?v=20261029_clean" />
+</head>
+<body>
+  <div class="dashboard-screen">
+    <!-- ================== 顶部 Header 控制大厅 ================== -->
+    <header class="dashboard-header">
+      <div class="header-top-accent"></div>
 
-<html>
-	<head>
-		<meta charset="UTF-8" />
-		<title>大屏数据可视化</title>
-		<style type="text/css">
-			* {margin:0;padding:0;}
-			.header {line-height:52px;text-align:center;font-size:24px;
-				color:rgb(255,229,86);background-color:#101f32;}
-			.wrapper {display:-webkit-flex;display:flex;justify-content:space-around;
-				flex-wrap:nowrap;margin:0 auto;max-width:1000px;min-width:600px;}
-			.case {display:block;width:50%;margin:15px;text-decoration:none;color:#101f32;}
-			.case h3 {margin-bottom:3px;font-size:16px;}
-			.case img {display:block;width:100%;}
-		</style>
-	</head>
-	<body>
-		<div class="header">大屏数据可视化</div>
-		<div class="wrapper">
-			<a class="case" href="case09/index.html" target="_blank">
-				<h3>项目案例 - 上市公司全景概览</h3>
-				<img class="thumb" src="case09/img/thumb.jpg" />
-			</a>
-			<a class="case" href="case07/index.html" target="_blank">
-				<h3>项目案例 - 上市公司地域分布</h3>
-				<img class="thumb" src="case07/img/thumb.jpg" />
-			</a>
-		</div>
-		<div class="wrapper">
-			<a class="case" href="case06/index.html" target="_blank">
-				<h3>旭日图 - 基于ECharts V4.2</h3>
-				<img class="thumb" src="case06/img/thumb.jpg" />
-			</a>
-			<a class="case" href="case08/index.html" target="_blank">
-				<h3>树图 - 基于ECharts V4.2</h3>
-				<img class="thumb" src="case08/img/thumb.jpg" />
-			</a>
-		</div>
-		<div class="wrapper">
-			<a class="case" href="case01/index.html" target="_blank">
-				<h3>地图数据可视化 - 基于ECharts Geo</h3>
-				<img class="thumb" src="case01/img/thumb.jpg" />
-			</a>
-			<a class="case" href="case02/index.html" target="_blank">
-				<h3>3D图表展示 - 基于ECharts GL</h3>
-				<img class="thumb" src="case02/img/thumb.jpg" />
-			</a>
-		</div>
-		<div class="wrapper">
-			<a class="case" href="case03/index.html" target="_blank">
-				<h3>热力图展示 - 基于ECharts &amp; 百度地图</h3>
-				<img class="thumb" src="case03/img/thumb.jpg" />
-			</a>
-			<a class="case" href="case04/index.html" target="_blank">
-				<h3>ECharts扩展示例</h3>
-				<img class="thumb" src="case04/img/thumb.jpg" />
-			</a>
-		</div>
-		<div class="wrapper">
-			<a class="case" href="https://datav.aliyun.com/share/5a2335ee9571434e29acbe0eb19f2ea5" target="_blank">
-				<h3>阿里云DataV案例 - 智慧文旅驾驶舱</h3>
-				<img class="thumb" src="datav/datav1.jpg" />
-			</a>
-			<a class="case" href="https://datav.aliyun.com/share/36232cfef0b6a555a7c08d8a51fbd882" target="_blank">
-				<h3>阿里云DataV案例 - 企业实时销售大盘</h3>
-				<img class="thumb" src="datav/datav2.jpg" />
-			</a>
-		</div>
-		<div class="wrapper">
-			<a class="case" href="https://sugar.baidu.com/dashboard/58f5f1c06faf70694d3dc755230f874f" target="_blank">
-				<h3>百度Sugar案例 - 上交所上市公司全景概览</h3>
-				<img class="thumb" src="sugar/sugar1.jpg" />
-			</a>
-			<a class="case" href="https://sugar.baidu.com/dashboard/646639d470c66941baff68fe0dd020c8" target="_blank">
-				<h3>百度Sugar案例 - 深交所上市公司全景概览</h3>
-				<img class="thumb" src="sugar/sugar2.jpg" />
-			</a>
-		</div>
-		<div class="wrapper">
-			<a class="case" href="https://v.yuntus.com/cloudv/74b254c06afa8253def97a379528a15e" target="_blank">
-				<h3>腾讯云图案例 - 云计算服务监控</h3>
-				<img class="thumb" src="yuntu/yuntu1.jpg" />
-			</a>
-			<a class="case" href="https://v.yuntus.com/cloudv/efd5a1b1cb3016f2f4f96f63a23b3a5c" target="_blank">
-				<h3>腾讯云图案例 - 智慧零售门店数据（竖屏版）</h3>
-				<img class="thumb" src="yuntu/yuntu2.jpg" />
-			</a>
-		</div>
-		<div class="wrapper">
-			<a class="case" href="tpl01/index.html" target="_blank">
-				<h3>大屏模板</h3>
-				<img class="thumb" src="tpl01/img/thumb.jpg" />
-			</a>
-			<a class="case" href="tpl02/index.html" target="_blank">
-				<h3>大屏模板</h3>
-				<img class="thumb" src="tpl02/img/thumb.jpg" />
-			</a>
-		</div>
-		<div class="wrapper">
-			<a class="case" href="tpl03/index.html" target="_blank">
-				<h3>大屏模板</h3>
-				<img class="thumb" src="tpl03/img/thumb.jpg" />
-			</a>
-			<a class="case" href="tpl04/index.html" target="_blank">
-				<h3>大屏模板</h3>
-				<img class="thumb" src="tpl04/img/thumb.jpg" />
-			</a>
-		</div>
-		<div class="wrapper">
-			<a class="case" style="width:100%;"
-				href="tpl05/index.html" target="_blank">
-				<h3>大屏模板（定制尺寸 3840 * 864）</h3>
-				<img class="thumb" src="tpl05/img/thumb.png" />
-			</a>
-		</div>
-	</body>
+      <!-- 左侧：3D科技地球仪与实时时钟角标 (复刻图一) -->
+      <div class="header-left-zone">
+        <div class="globe-wrapper" title="出海全球多市场航线网络">
+          <canvas id="earthGlobeCanvas"></canvas>
+        </div>
+        <div class="tech-clock-badge">
+          <span id="techClockText">2026-10-29 11:00:00</span>
+          <span class="tech-lines">\\\\</span>
+        </div>
+      </div>
+
+      <!-- 中间：AMS 总销售额超大数字翻牌器与悬浮舞台 (复刻图一，纯美元，已删除多余标签) -->
+      <div class="header-center-zone">
+        <div class="ams-title-wrapper">
+          <h1 class="ams-header-title">AMS 总销售额</h1>
+        </div>
+
+        <div class="ams-counter-stage">
+          <div class="ams-flip-counter" id="amsFlipCounter">
+            <!-- 动态生成数码翻牌器框体，如 $ 1,684,609 -->
+            <span class="digit-box digit-symbol">$</span>
+            <span class="digit-separator-space"></span>
+            <span class="digit-box digit-number">1</span>
+            <span class="digit-box digit-comma">,</span>
+            <span class="digit-box digit-number">6</span>
+            <span class="digit-box digit-number">8</span>
+            <span class="digit-box digit-number">4</span>
+            <span class="digit-box digit-comma">,</span>
+            <span class="digit-box digit-number">6</span>
+            <span class="digit-box digit-number">0</span>
+            <span class="digit-box digit-number">9</span>
+          </div>
+          <!-- 底部科技发光舞台 -->
+          <div class="stage-pedestal"></div>
+        </div>
+      </div>
+
+      <!-- 右侧：保持干净清爽，仅保留极简全屏大屏快捷键 -->
+      <div class="header-right-zone">
+        <button id="fullscreenToggleBtn" class="hud-btn-mini" title="全屏切换">
+          <span class="icon">⛶</span> 全屏
+        </button>
+      </div>
+    </header>
+
+    <!-- ================== 看板核心工作区 ================== -->
+    <main class="dashboard-body">
+      <!-- 1. 四大店铺销售额核心卡片组 (在一张页面呈现4个店铺) -->
+      <section class="stores-kpi-row">
+        <!-- 店铺 1: aosom.eu -->
+        <div class="store-kpi-card" data-store-name="aosom.eu" title="点击聚焦查看 aosom.eu 柱状图">
+          <div class="store-card-header">
+            <div class="store-brand-info">
+              <span class="store-color-badge" style="background:#00f0ff; color:#00f0ff;"></span>
+              <span class="store-name-text">aosom.eu</span>
+              <span class="store-category-tag">欧洲全品类</span>
+            </div>
+            <div class="store-share-pill">占比 <span class="store-share-val">42.0%</span></div>
+          </div>
+          <div class="store-card-main-data">
+            <div class="store-sales-val">$ 700,675</div>
+          </div>
+          <div class="store-card-footer">
+            <div class="store-markets-summary"></div>
+          </div>
+        </div>
+
+        <!-- 店铺 2: homcom.fr -->
+        <div class="store-kpi-card" data-store-name="homcom.fr" title="点击聚焦查看 homcom.fr 柱状图">
+          <div class="store-card-header">
+            <div class="store-brand-info">
+              <span class="store-color-badge" style="background:#00e5ff; color:#00e5ff;"></span>
+              <span class="store-name-text">homcom.fr</span>
+              <span class="store-category-tag">法国家居</span>
+            </div>
+            <div class="store-share-pill">占比 <span class="store-share-val">23.0%</span></div>
+          </div>
+          <div class="store-card-main-data">
+            <div class="store-sales-val">$ 386,394</div>
+          </div>
+          <div class="store-card-footer">
+            <div class="store-markets-summary"></div>
+          </div>
+        </div>
+
+        <!-- 店铺 3: homcomstore -->
+        <div class="store-kpi-card" data-store-name="homcomstore" title="点击聚焦查看 homcomstore 柱状图">
+          <div class="store-card-header">
+            <div class="store-brand-info">
+              <span class="store-color-badge" style="background:#7000ff; color:#7000ff;"></span>
+              <span class="store-name-text">homcomstore</span>
+              <span class="store-category-tag">全球品牌站</span>
+            </div>
+            <div class="store-share-pill">占比 <span class="store-share-val">21.0%</span></div>
+          </div>
+          <div class="store-card-main-data">
+            <div class="store-sales-val">$ 356,260</div>
+          </div>
+          <div class="store-card-footer">
+            <div class="store-markets-summary"></div>
+          </div>
+        </div>
+
+        <!-- 店铺 4: outsunny.fr -->
+        <div class="store-kpi-card" data-store-name="outsunny.fr" title="点击聚焦查看 outsunny.fr 柱状图">
+          <div class="store-card-header">
+            <div class="store-brand-info">
+              <span class="store-color-badge" style="background:#00ff88; color:#00ff88;"></span>
+              <span class="store-name-text">outsunny.fr</span>
+              <span class="store-category-tag">法国户外庭院</span>
+            </div>
+            <div class="store-share-pill">占比 <span class="store-share-val">14.0%</span></div>
+          </div>
+          <div class="store-card-main-data">
+            <div class="store-sales-val">$ 241,281</div>
+          </div>
+          <div class="store-card-footer">
+            <div class="store-markets-summary"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 2. 下半部分核心主区 (左侧：主柱状图；右侧：占比图 + 多市场销售额表) -->
+      <section class="dashboard-main-grid">
+        <!-- 左侧：科技 HUD 柱状图卡片 (深度复刻图一) -->
+        <div class="hud-card main-chart-hud-card">
+          <div class="hud-corner corner-tl"></div>
+          <div class="hud-corner corner-tr"></div>
+          <div class="hud-corner corner-bl"></div>
+          <div class="hud-corner corner-br"></div>
+
+          <!-- 卡片顶栏与视图切换 Tabs -->
+          <div class="hud-card-header">
+            <div class="hud-card-title">
+              <span class="title-icon-bar"></span>
+              <span>各店铺市场销售分布柱状图 (参考图一)</span>
+            </div>
+
+            <!-- 视图模式切换 -->
+            <div class="view-tabs-group">
+              <button class="view-tab-btn active" data-mode="all" title="全景多市场四店对比">四店联合对比</button>
+              <button class="view-tab-btn" data-mode="quad" title="同时独立展示4个店铺的2x2柱状图分屏">2x2 四分屏独立矩阵</button>
+              <button class="view-tab-btn" data-mode="store" data-store="aosom.eu">aosom.eu</button>
+              <button class="view-tab-btn" data-mode="store" data-store="homcom.fr">homcom.fr</button>
+              <button class="view-tab-btn" data-mode="store" data-store="homcomstore">homcomstore</button>
+              <button class="view-tab-btn" data-mode="store" data-store="outsunny.fr">outsunny.fr</button>
+            </div>
+          </div>
+
+          <div class="hud-card-body">
+            <!-- 视图一与视图三的图表容器 -->
+            <div id="mainBarChartContainer">
+              <div id="mainBarChart"></div>
+            </div>
+
+            <!-- 视图二：2x2 四分屏独立矩阵容器 -->
+            <div id="quadViewContainer">
+              <div class="quad-item">
+                <div class="quad-item-title" style="color:#00f0ff;">
+                  <span>aosom.eu 市场销售柱状图</span>
+                </div>
+                <div class="quad-chart-canvas" id="quad_aosom_eu"></div>
+              </div>
+
+              <div class="quad-item">
+                <div class="quad-item-title" style="color:#00e5ff;">
+                  <span>homcom.fr 市场销售柱状图</span>
+                </div>
+                <div class="quad-chart-canvas" id="quad_homcom_fr"></div>
+              </div>
+
+              <div class="quad-item">
+                <div class="quad-item-title" style="color:#7000ff;">
+                  <span>homcomstore 市场销售柱状图</span>
+                </div>
+                <div class="quad-chart-canvas" id="quad_homcomstore"></div>
+              </div>
+
+              <div class="quad-item">
+                <div class="quad-item-title" style="color:#00ff88;">
+                  <span>outsunny.fr 市场销售柱状图</span>
+                </div>
+                <div class="quad-chart-canvas" id="quad_outsunny_fr"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 右侧边栏：四店铺占比环形图 + 多市场数据排行榜 -->
+        <div class="dashboard-sidebar">
+          <!-- 上半卡片：四店铺销售额占比 -->
+          <div class="hud-card sidebar-half-card" style="flex: 0.85;">
+            <div class="hud-corner corner-tl"></div>
+            <div class="hud-corner corner-tr"></div>
+            <div class="hud-corner corner-bl"></div>
+            <div class="hud-corner corner-br"></div>
+
+            <div class="hud-card-header">
+              <div class="hud-card-title">
+                <span class="title-icon-bar" style="background:#7000ff; box-shadow:0 0 8px #7000ff;"></span>
+                <span>四店铺销售额贡献占比</span>
+              </div>
+            </div>
+            <div class="hud-card-body">
+              <div id="storeShareChart" style="width:100%;height:100%;"></div>
+            </div>
+          </div>
+
+          <!-- 下半卡片：多市场销售额排行榜表格 -->
+          <div class="hud-card sidebar-half-card" style="flex: 1.15;">
+            <div class="hud-corner corner-tl"></div>
+            <div class="hud-corner corner-tr"></div>
+            <div class="hud-corner corner-bl"></div>
+            <div class="hud-corner corner-br"></div>
+
+            <div class="hud-card-header">
+              <div class="hud-card-title">
+                <span class="title-icon-bar" style="background:#ffb703; box-shadow:0 0 8px #ffb703;"></span>
+                <span>店铺与市场销售额排行榜</span>
+              </div>
+            </div>
+            <div class="hud-card-body">
+              <div class="market-table-wrapper">
+                <table class="tech-market-table">
+                  <thead>
+                    <tr>
+                      <th class="col-rank">排名</th>
+                      <th>所属店铺</th>
+                      <th>市场</th>
+                      <th>销售额 ($)</th>
+                    </tr>
+                  </thead>
+                  <tbody id="marketTableBody">
+                    <!-- 动态生成数据行 -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- 引入依赖脚本 (本地离线可完美运行) -->
+  <script src="lib/echarts.min.js"></script>
+  <script src="js/dataService.js"></script>
+  <script src="js/globe.js"></script>
+  <script src="js/charts.js"></script>
+  <script src="js/dashboard.js"></script>
+</body>
 </html>
