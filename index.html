@@ -3,235 +3,283 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AMS 销售看板</title>
-  <!-- 默认加载商务科技蓝大屏样式，支持动态切换 -->
-  <link id="themeStylesheet" rel="stylesheet" href="css/theme-business-blue.css?v=20261029" />
+  <title>AMS 销售看板 - 全球电商黑五作战指挥中心</title>
+  <link rel="stylesheet" href="css/theme-business-blue.css?v=20261029_v2" />
 </head>
 <body>
   <div class="dashboard-screen">
-    <!-- ================== 顶部 Header 控制大厅 ================== -->
+    <!-- ================== 1. 顶部 Header ================== -->
     <header class="dashboard-header">
-      <div class="header-top-accent"></div>
-
-      <!-- 左侧：3D 地球仪与实时时钟 -->
-      <div class="header-left-zone">
-        <div class="globe-wrapper" title="出海全球多市场航线网络">
-          <canvas id="earthGlobeCanvas"></canvas>
-        </div>
-        <div class="tech-clock-badge">
-          <span id="techClockText">2026-10-29 11:00:00</span>
-          <span class="tech-lines">\\\\</span>
+      <div class="header-brand-zone">
+        <div class="brand-icon-box">📊</div>
+        <div class="brand-title-wrap">
+          <span class="brand-sub-badge">AMS COMMERCE OPS</span>
+          <h1 class="brand-main-title">AMS Black Friday Global Command Center</h1>
         </div>
       </div>
 
-      <!-- 中间：AMS 总销售额舞台与翻牌器 (统一美元 $) -->
-      <div class="header-center-zone">
-        <div class="ams-title-wrapper">
-          <h1 class="ams-header-title">AMS 总销售额</h1>
+      <div class="header-actions-zone">
+        <div class="live-pulse-badge">
+          <span class="pulse-dot"></span>
+          <span id="liveClockText">Updated 13:17:38</span>
         </div>
-        <div class="ams-counter-stage">
-          <div class="ams-flip-counter" id="amsFlipCounter">
-            <!-- 动态生成数码翻牌器框体 -->
-          </div>
-        </div>
-      </div>
 
-      <!-- 右侧：多版本快速切换胶囊导航 + 全屏按钮 -->
-      <div class="header-right-zone">
         <div class="theme-switcher-capsule" title="多版本视觉风格一键切换">
           <a href="version-business-blue/index.html" class="theme-pill-btn active">🏢 商务科技蓝</a>
           <a href="version-black-gold/index.html" class="theme-pill-btn">🏆 黑五黑金</a>
           <a href="version-minimal-slate/index.html" class="theme-pill-btn">⚡ 极简现代灰</a>
           <a href="version-cyberpunk/index.html" class="theme-pill-btn">🌌 赛博朋克</a>
         </div>
+
         <button id="fullscreenToggleBtn" class="fullscreen-btn" title="全屏切换">
           <span>⛶</span> 全屏
         </button>
       </div>
     </header>
 
-    <!-- ================== 看板核心工作区 ================== -->
-    <main class="dashboard-main">
-      <!-- 1. 四大店铺销售额核心卡片组 -->
-      <section class="stores-kpi-row">
-        <!-- 店铺 1: aosom.eu -->
-        <div class="store-kpi-card" data-store-name="aosom.eu" title="点击聚焦查看 aosom.eu 柱状图">
-          <div class="store-card-header">
-            <div class="store-brand-info">
-              <span class="brand-status-dot"></span>
-              <span class="store-name-text">aosom.eu</span>
-              <span class="store-category-tag">欧洲全品类</span>
-            </div>
-            <div class="store-share-percent">占比 <span class="store-share-val">45.0%</span></div>
-          </div>
-          <div class="store-card-body">
-            <span class="store-currency-symbol">$</span>
-            <span class="store-sales-val">867,324</span>
-          </div>
-          <div class="store-card-footer">
-            <div class="store-markets-summary"></div>
-          </div>
+    <!-- ================== 核心工作区 ================== -->
+    <main class="dashboard-content">
+
+      <!-- ================== Section 1: GLOBAL PERFORMANCE (全店铺营收与订单分析) ================== -->
+      <section class="dashboard-section">
+        <div class="section-meta-header">
+          <span class="section-label">GLOBAL PERFORMANCE</span>
+          <h2 class="section-title">Live sales & order analytics</h2>
         </div>
 
-        <!-- 店铺 2: homcom.fr -->
-        <div class="store-kpi-card" data-store-name="homcom.fr" title="点击聚焦查看 homcom.fr 柱状图">
-          <div class="store-card-header">
-            <div class="store-brand-info">
-              <span class="brand-status-dot"></span>
-              <span class="store-name-text">homcom.fr</span>
-              <span class="store-category-tag">法国家居</span>
+        <div class="global-performance-grid">
+          <!-- 左大卡：全店铺营收信息 (换算为 USD) -->
+          <div class="kpi-master-card">
+            <div class="kpi-header-row">
+              <span class="kpi-title-text">TOTAL GROSS REVENUE (全店铺总营收 USD)</span>
+              <div class="kpi-icon-pill">💲</div>
             </div>
-            <div class="store-share-percent">占比 <span class="store-share-val">21.4%</span></div>
-          </div>
-          <div class="store-card-body">
-            <span class="store-currency-symbol">$</span>
-            <span class="store-sales-val">412,987</span>
-          </div>
-          <div class="store-card-footer">
-            <div class="store-markets-summary"></div>
-          </div>
-        </div>
-
-        <!-- 店铺 3: homcomstore -->
-        <div class="store-kpi-card" data-store-name="homcomstore" title="点击聚焦查看 homcomstore 柱状图">
-          <div class="store-card-header">
-            <div class="store-brand-info">
-              <span class="brand-status-dot"></span>
-              <span class="store-name-text">homcomstore</span>
-              <span class="store-category-tag">全球品牌站</span>
+            <div class="revenue-huge-val" id="globalTotalRevenue">
+              <span class="currency-symbol">$</span>0<span class="decimal-part">.00</span> <span class="usd-badge">USD</span>
             </div>
-            <div class="store-share-percent">占比 <span class="store-share-val">20.2%</span></div>
-          </div>
-          <div class="store-card-body">
-            <span class="store-currency-symbol">$</span>
-            <span class="store-sales-val">388,536</span>
-          </div>
-          <div class="store-card-footer">
-            <div class="store-markets-summary"></div>
-          </div>
-        </div>
-
-        <!-- 店铺 4: outsunny.fr -->
-        <div class="store-kpi-card" data-store-name="outsunny.fr" title="点击聚焦查看 outsunny.fr 柱状图">
-          <div class="store-card-header">
-            <div class="store-brand-info">
-              <span class="brand-status-dot"></span>
-              <span class="store-name-text">outsunny.fr</span>
-              <span class="store-category-tag">法国户外庭院</span>
-            </div>
-            <div class="store-share-percent">占比 <span class="store-share-val">13.4%</span></div>
-          </div>
-          <div class="store-card-body">
-            <span class="store-currency-symbol">$</span>
-            <span class="store-sales-val">259,059</span>
-          </div>
-          <div class="store-card-footer">
-            <div class="store-markets-summary"></div>
-          </div>
-        </div>
-      </section>
-
-      <!-- 2. 下半部分核心主区 (左侧：主柱状图；右侧：占比图 + 多市场销售额表) -->
-      <section class="dashboard-main-grid">
-        <!-- 左侧：主柱状图卡片 -->
-        <div class="hud-card main-chart-hud-card">
-          <div class="hud-card-header">
-            <div class="hud-card-title">
-              <span class="title-icon-bar"></span>
-              <span>各店铺市场销售分布柱状图 (参考图一)</span>
-            </div>
-
-            <!-- 视图模式切换 -->
-            <div class="view-tabs-group">
-              <button class="view-tab-btn active" data-mode="all" title="全景多市场四店对比">四店联合对比</button>
-              <button class="view-tab-btn" data-mode="quad" title="同时独立展示4个店铺的2x2柱状图分屏">2x2 四分屏独立矩阵</button>
-              <button class="view-tab-btn" data-mode="store" data-store="aosom.eu">aosom.eu</button>
-              <button class="view-tab-btn" data-mode="store" data-store="homcom.fr">homcom.fr</button>
-              <button class="view-tab-btn" data-mode="store" data-store="homcomstore">homcomstore</button>
-              <button class="view-tab-btn" data-mode="store" data-store="outsunny.fr">outsunny.fr</button>
-            </div>
+            <div class="revenue-accent-bar"></div>
           </div>
 
-          <div class="hud-card-body">
-            <div id="mainBarChartContainer">
-              <div id="mainBarChart"></div>
+          <!-- 右大卡：全店铺订单总量与指标分析 -->
+          <div class="kpi-master-card">
+            <div class="kpi-header-row">
+              <span class="kpi-title-text">TOTAL ORDERS PROCESSED (全店铺订单总量)</span>
+              <div class="kpi-icon-pill">📦</div>
             </div>
+            <div class="orders-master-num" id="globalTotalOrders">0</div>
+            <div class="orders-sub-note">Completed across all stores ↗ 21.4%</div>
 
-            <div id="quadViewContainer">
-              <div class="quad-item">
-                <div class="quad-item-title" id="quadTitle1">
-                  <span>aosom.eu 市场销售柱状图</span>
-                </div>
-                <div class="quad-chart-canvas" id="quad_aosom_eu"></div>
+            <div class="sub-metrics-split-row">
+              <!-- 全店铺客单价 (订单金额/订单量) -->
+              <div class="sub-metric-block">
+                <span class="sub-metric-label">AVERAGE ORDER VALUE (全店客单价)</span>
+                <span class="sub-metric-val" id="globalAov">$0.00</span>
               </div>
-
-              <div class="quad-item">
-                <div class="quad-item-title" id="quadTitle2">
-                  <span>homcom.fr 市场销售柱状图</span>
-                </div>
-                <div class="quad-chart-canvas" id="quad_homcom_fr"></div>
-              </div>
-
-              <div class="quad-item">
-                <div class="quad-item-title" id="quadTitle3">
-                  <span>homcomstore 市场销售柱状图</span>
-                </div>
-                <div class="quad-chart-canvas" id="quad_homcomstore"></div>
-              </div>
-
-              <div class="quad-item">
-                <div class="quad-item-title" id="quadTitle4">
-                  <span>outsunny.fr 市场销售柱状图</span>
-                </div>
-                <div class="quad-chart-canvas" id="quad_outsunny_fr"></div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- 右侧边栏：四店铺占比环形图 + 多市场数据排行榜 -->
-        <div class="dashboard-sidebar">
-          <!-- 上半卡片：四店铺销售额占比 -->
-          <div class="hud-card sidebar-half-card" style="flex: 0.85;">
-            <div class="hud-card-header">
-              <div class="hud-card-title">
-                <span class="title-icon-bar" style="background:#2563eb;"></span>
-                <span>四店铺销售额贡献占比</span>
-              </div>
-            </div>
-            <div class="hud-card-body">
-              <div id="storeShareChart" style="width:100%;height:100%;"></div>
-            </div>
-          </div>
-
-          <!-- 下半卡片：多市场销售数据排行榜 -->
-          <div class="hud-card sidebar-half-card" style="flex: 1.15;">
-            <div class="hud-card-header">
-              <div class="hud-card-title">
-                <span class="title-icon-bar" style="background:#3b82f6;"></span>
-                <span>店铺与市场销售额排行榜</span>
-              </div>
-            </div>
-            <div class="hud-card-body">
-              <div class="market-table-wrapper">
-                <table class="tech-market-table">
-                  <thead>
-                    <tr>
-                      <th class="col-rank">排名</th>
-                      <th>所属店铺</th>
-                      <th>市场</th>
-                      <th>销售额 ($)</th>
-                    </tr>
-                  </thead>
-                  <tbody id="marketTableBody">
-                    <!-- 动态生成数据行 -->
-                  </tbody>
-                </table>
+              <!-- 全店铺转化率 (订单数量/总流量) -->
+              <div class="sub-metric-block">
+                <span class="sub-metric-label">CONVERSION RATE (全店转化率)</span>
+                <span class="sub-metric-val" id="globalConversionRate">0.00%</span>
               </div>
             </div>
           </div>
         </div>
       </section>
+
+      <!-- ================== Section 2: LIVE MOMENTUM (单店铺营收纵向大柱图) ================== -->
+      <section class="dashboard-section">
+        <div class="momentum-card">
+          <div class="momentum-top-bar">
+            <div class="momentum-title-group">
+              <span class="momentum-icon-pulse">⚡</span>
+              <div>
+                <span class="section-label">LIVE MOMENTUM</span>
+                <h3 class="section-title">Real-Time Revenue Growth Velocity <span style="font-size:12px;color:var(--text-dim);font-weight:normal;">(Accumulated USD)</span></h3>
+              </div>
+            </div>
+
+            <div class="momentum-metrics-group">
+              <div class="momentum-metric-item">
+                <span class="m-label">ACCUMULATED REVENUE (总营收)</span>
+                <span class="m-val" id="accumulatedRevenueVal">$0</span>
+              </div>
+              <div class="momentum-metric-item">
+                <span class="m-label">LEADING STORE (最高收入店铺)</span>
+                <span class="m-val m-val-highlight" id="leadingStoreName">-</span>
+                <span style="font-size:11px;color:#94a3b8;font-family:var(--font-mono);" id="leadingStoreRevenue">$0 USD</span>
+              </div>
+              <div class="momentum-metric-item">
+                <span class="m-label">COMBINED RUN-RATE (最近一小时营收)</span>
+                <span class="m-val m-val-gold" id="hourlyRunRateVal">$0 / hr</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 单店铺营收纵向大柱状图 -->
+          <div class="single-store-chart-container">
+            <div id="singleStoreBarChart" style="width:100%;height:100%;"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================== Section 3: NETWORK OVERVIEW (单店铺营收情况 4大店铺) ================== -->
+      <section class="dashboard-section">
+        <div class="section-meta-header">
+          <span class="section-label">NETWORK OVERVIEW</span>
+          <h2 class="section-title">Orders by storefront (单店铺营收情况)</h2>
+        </div>
+
+        <div class="storefronts-grid">
+          <!-- 01 HOMCOM Store (品牌站) -->
+          <div class="storefront-card" data-store-id="homcomstore">
+            <div class="storefront-card-top">
+              <div class="store-id-name-wrap">
+                <span class="store-idx">01</span>
+                <span class="store-name-bold">HOMCOM Store</span>
+                <span class="store-type-badge">品牌站</span>
+              </div>
+              <span class="store-status-online">● ONLINE</span>
+            </div>
+            <div class="store-card-middle">
+              <div>
+                <span class="card-orders-num">0</span>
+                <span class="orders-unit-label">Orders</span>
+              </div>
+              <div class="card-revenue-box">
+                <span class="revenue-tiny-label">REVENUE</span>
+                <span class="card-revenue-num">$0.00 USD</span>
+              </div>
+            </div>
+            <div class="storefront-card-bottom">
+              <span class="card-markets-chips">US · UK · CA</span>
+              <span class="card-markets-count">3 markets</span>
+            </div>
+          </div>
+
+          <!-- 02 Outsunny FR (品牌站) -->
+          <div class="storefront-card" data-store-id="outsunny_fr">
+            <div class="storefront-card-top">
+              <div class="store-id-name-wrap">
+                <span class="store-idx">02</span>
+                <span class="store-name-bold">Outsunny FR</span>
+                <span class="store-type-badge">品牌站</span>
+              </div>
+              <span class="store-status-online">● ONLINE</span>
+            </div>
+            <div class="store-card-middle">
+              <div>
+                <span class="card-orders-num">0</span>
+                <span class="orders-unit-label">Orders</span>
+              </div>
+              <div class="card-revenue-box">
+                <span class="revenue-tiny-label">REVENUE</span>
+                <span class="card-revenue-num">$0.00 USD</span>
+              </div>
+            </div>
+            <div class="storefront-card-bottom">
+              <span class="card-markets-chips">FR · BE</span>
+              <span class="card-markets-count">2 markets</span>
+            </div>
+          </div>
+
+          <!-- 03 HOMCOM FR (品牌站) -->
+          <div class="storefront-card" data-store-id="homcom_fr">
+            <div class="storefront-card-top">
+              <div class="store-id-name-wrap">
+                <span class="store-idx">03</span>
+                <span class="store-name-bold">HOMCOM FR</span>
+                <span class="store-type-badge">品牌站</span>
+              </div>
+              <span class="store-status-online">● ONLINE</span>
+            </div>
+            <div class="store-card-middle">
+              <div>
+                <span class="card-orders-num">0</span>
+                <span class="orders-unit-label">Orders</span>
+              </div>
+              <div class="card-revenue-box">
+                <span class="revenue-tiny-label">REVENUE</span>
+                <span class="card-revenue-num">$0.00 USD</span>
+              </div>
+            </div>
+            <div class="storefront-card-bottom">
+              <span class="card-markets-chips">FR</span>
+              <span class="card-markets-count">1 market</span>
+            </div>
+          </div>
+
+          <!-- 04 AOSOM EU (泛欧站) -->
+          <div class="storefront-card" data-store-id="aosom_eu">
+            <div class="storefront-card-top">
+              <div class="store-id-name-wrap">
+                <span class="store-idx">04</span>
+                <span class="store-name-bold">AOSOM EU</span>
+                <span class="store-type-badge paneu">泛欧站</span>
+              </div>
+              <span class="store-status-online">● ONLINE</span>
+            </div>
+            <div class="store-card-middle">
+              <div>
+                <span class="card-orders-num">0</span>
+                <span class="orders-unit-label">Orders</span>
+              </div>
+              <div class="card-revenue-box">
+                <span class="revenue-tiny-label">REVENUE</span>
+                <span class="card-revenue-num">$0.00 USD</span>
+              </div>
+            </div>
+            <div class="storefront-card-bottom">
+              <span class="card-markets-chips">DE · UK · FR · ES · IT...</span>
+              <span class="card-markets-count">10 markets</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================== Section 4: MARKET INTELLIGENCE (业务线营收与智能报表) ================== -->
+      <section class="dashboard-section">
+        <div class="market-intelligence-card">
+          <div class="intelligence-top-bar">
+            <div>
+              <span class="section-label">MARKET INTELLIGENCE</span>
+              <h3 class="section-title">Country & Market Intelligence Breakdown <span style="font-size:12px;color:var(--text-dim);font-weight:normal;">(业务线营收情况)</span></h3>
+            </div>
+
+            <!-- 业务线筛选 Tab 按钮组 -->
+            <div class="biz-tabs-group">
+              <button class="biz-tab-btn active" data-line="all">全站 (All Stores)</button>
+              <button class="biz-tab-btn" data-line="brand">品牌站 (Brand Stores)</button>
+              <button class="biz-tab-btn" data-line="pan_eu">泛欧站 (AOSOM EU)</button>
+            </div>
+
+            <div class="currency-tag-indicator">Revenue (USD)</div>
+          </div>
+
+          <!-- 业务线店铺营收横向对比图 -->
+          <div class="horizontal-rank-chart-box">
+            <div id="horizontalRankChart" style="width:100%;height:100%;"></div>
+          </div>
+
+          <!-- 数据明细智能报表 (已去除划掉的多余列，聚焦营收、订单、客单价、转化率) -->
+          <div class="intelligence-table-wrapper">
+            <table class="intel-table">
+              <thead>
+                <tr>
+                  <th style="min-width: 220px;">COUNTRY / MARKET (店铺/市场)</th>
+                  <th style="min-width: 150px;">营收 (LIVE REVENUE USD)</th>
+                  <th style="min-width: 140px;">市场份额：营收占比</th>
+                  <th style="min-width: 110px;">总订单数 (ORDERS)</th>
+                  <th style="min-width: 120px;">客单价 (AOV USD)</th>
+                  <th style="min-width: 110px;">转化率 (CONVERSION)</th>
+                </tr>
+              </thead>
+              <tbody id="intelligenceTableBody">
+                <!-- 动态生成数据行 -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
     </main>
   </div>
 
@@ -241,11 +289,9 @@
     window.ACTIVE_THEME = 'business-blue';
   </script>
   <script src="js/dataService.js"></script>
-  <script src="js/globe.js"></script>
   <script src="js/charts.js"></script>
   <script src="js/dashboard.js"></script>
   <script>
-    // 全屏切换
     document.getElementById('fullscreenToggleBtn')?.addEventListener('click', () => {
       if (!document.fullscreenElement) {
         document.documentElement.requestFullscreen().catch(err => console.log(err));

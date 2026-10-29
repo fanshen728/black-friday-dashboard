@@ -1,187 +1,256 @@
 /**
- * AMS 销售看板 - 纯净版数据服务层
- * 遵循极简原则 (KISS/YAGNI)：
- * 1. 所有金额均统一为美元 ($)
- * 2. 支持各店铺动态多市场 (有的店铺10个市场，有的店铺只有1个市场)
- * 3. 极简清晰的数据结构：店铺名称、店铺销售额、包含的市场及市场销售额
- * 4. 10秒后台静默轮询更新 (自动脉冲波动)
+ * AMS 销售看板 - 数据服务层 (新版排版驱动)
+ * 职责：
+ * 1. 管理4大店铺及其各个市场的销售额 (sales)、订单数量 (orders)、流量 (traffic)
+ * 2. 标记店铺属性：品牌站 (brand) 或 泛欧站 (pan_eu)
+ * 3. 前端自动汇总计算：
+ *    - 各店铺销售总额、总订单量、客单价 (AOV = 销售额 / 订单量)、转化率 (Conversion = 订单量 / 流量)
+ *    - AMS 全站总销售额 (TOTAL GROSS REVENUE)
+ *    - 全店铺订单总量 (TOTAL ORDERS PROCESSED)
+ *    - 全店铺客单价 (AOV) 与 全店铺转化率 (CONVERSION RATE)
+ *    - 业务线汇总 (全站 / 品牌站 / 泛欧站)
+ * 4. 10秒后台静默轮询更新 (自动微脉冲波动)
  */
 
 class DataService {
   constructor() {
-    this.pollInterval = 10; // 秒
+    this.pollInterval = 10; // 10秒轮询
     this.timer = null;
     this.subscribers = [];
-
-    // 默认后端接口配置
     this.apiEndpoint = '/api/ams/sales';
+    this.currentData = null;
 
-    // 初始化 Mock 数据状态 (各店铺差异化多市场，纯美元)
-    this.initData();
+    this.initMockStores();
   }
 
-  initData() {
-    this.stores = [
+  /**
+   * 初始化4大店铺初始数据
+   * 包含：品牌站 (brand) 3家 + 泛欧站 (pan_eu) 1家
+   */
+  initMockStores() {
+    this.rawStores = [
       {
-        storeName: 'aosom.eu',
-        color: '#00f0ff',
-        category: '欧洲旗舰独立站',
+        storeId: 'homcomstore',
+        storeName: 'HOMCOM Store',
+        type: 'brand', // 品牌站
+        category: '品牌站',
+        icon: '🏠',
+        colorKey: 'homcomstore',
         markets: [
-          { marketName: 'DE', sales: 215400 },
-          { marketName: 'UK', sales: 168200 },
-          { marketName: 'FR', sales: 124500 },
-          { marketName: 'ES', sales: 95800 },
-          { marketName: 'IT', sales: 81200 },
-          { marketName: 'PT', sales: 52400 },
-          { marketName: 'IE', sales: 38900 },
-          { marketName: 'NL', sales: 34100 },
-          { marketName: 'PL', sales: 26800 },
-          { marketName: 'BE', sales: 19800 }
+          { marketName: 'US', sales: 684200.50, orders: 4410, traffic: 82000 },
+          { marketName: 'UK', sales: 412300.20, orders: 2680, traffic: 51000 },
+          { marketName: 'CA', sales: 279622.95, orders: 1780, traffic: 34000 }
         ]
       },
       {
-        storeName: 'homcom.fr',
-        color: '#00e5ff',
-        category: '法国家居生活独立站',
+        storeId: 'outsunny_fr',
+        storeName: 'Outsunny FR',
+        type: 'brand', // 品牌站
+        category: '品牌站',
+        icon: '⛺',
+        colorKey: 'outsunny.fr',
         markets: [
-          // 专属法国单一市场 (按用户需求：有的店铺可能只有1个市场)
-          { marketName: 'FR', sales: 412850 }
+          { marketName: 'FR', sales: 648900.40, orders: 4450, traffic: 83000 },
+          { marketName: 'BE', sales: 181704.00, orders: 1232, traffic: 23000 }
         ]
       },
       {
-        storeName: 'homcomstore',
-        color: '#7000ff',
-        category: '全球品牌站',
+        storeId: 'homcom_fr',
+        storeName: 'HOMCOM FR',
+        type: 'brand', // 品牌站
+        category: '品牌站',
+        icon: '🛋️',
+        colorKey: 'homcom.fr',
         markets: [
-          // 跨区域三大市场
-          { marketName: 'US', sales: 218600 },
-          { marketName: 'CA', sales: 104200 },
-          { marketName: 'UK', sales: 63500 }
+          { marketName: 'FR', sales: 751949.00, orders: 4396, traffic: 82300 }
         ]
       },
       {
-        storeName: 'outsunny.fr',
-        color: '#00ff88',
-        category: '法国户外露营独立站',
+        storeId: 'aosom_eu',
+        storeName: 'AOSOM EU',
+        type: 'pan_eu', // 泛欧站
+        category: '泛欧站',
+        icon: '🇪🇺',
+        colorKey: 'aosom.eu',
         markets: [
-          // 两个市场
-          { marketName: 'FR', sales: 198400 },
-          { marketName: 'BE', sales: 58900 }
+          { marketName: 'DE', sales: 325400.00, orders: 1920, traffic: 36000 },
+          { marketName: 'UK', sales: 248600.00, orders: 1460, traffic: 27000 },
+          { marketName: 'FR', sales: 186300.00, orders: 1100, traffic: 21000 },
+          { marketName: 'ES', sales: 142100.00, orders: 840, traffic: 16000 },
+          { marketName: 'IT', sales: 118400.00, orders: 700, traffic: 13000 },
+          { marketName: 'PT', sales: 76500.00, orders: 450, traffic: 8500 },
+          { marketName: 'IE', sales: 56800.00, orders: 335, traffic: 6300 },
+          { marketName: 'NL', sales: 49200.00, orders: 290, traffic: 5500 },
+          { marketName: 'PL', sales: 38700.00, orders: 228, traffic: 4300 },
+          { marketName: 'BE', sales: 28314.00, orders: 167, traffic: 3200 }
         ]
       }
     ];
 
-    this.recalculateSales();
+    this.currentData = this.calculateAggregates(this.rawStores);
   }
 
   /**
-   * 汇总计算各店铺销售额与 AMS 总销售额
+   * 前端核心计算引擎 (按照用户要求：总销售额和店铺总额由前端自动计算)
    */
-  recalculateSales() {
-    let amsTotal = 0;
-    this.stores.forEach(store => {
-      let storeTotal = 0;
-      store.markets.forEach(m => {
-        storeTotal += m.sales;
+  calculateAggregates(rawStores) {
+    let amsTotalSales = 0;
+    let amsTotalOrders = 0;
+    let amsTotalTraffic = 0;
+
+    let brandTotalSales = 0;
+    let brandTotalOrders = 0;
+    let panEuTotalSales = 0;
+    let panEuTotalOrders = 0;
+
+    const computedStores = rawStores.map(store => {
+      let storeSales = 0;
+      let storeOrders = 0;
+      let storeTraffic = 0;
+
+      const markets = store.markets.map(m => {
+        storeSales += m.sales;
+        storeOrders += m.orders;
+        storeTraffic += (m.traffic || m.orders * 18);
+
+        const aov = m.orders > 0 ? (m.sales / m.orders) : 0;
+        const conv = m.traffic > 0 ? ((m.orders / m.traffic) * 100) : 5.0;
+
+        return {
+          ...m,
+          aov,
+          conversion: conv
+        };
       });
-      store.storeSales = storeTotal;
-      amsTotal += storeTotal;
-    });
-    this.amsTotalSales = amsTotal;
-  }
 
-  /**
-   * 模拟10秒周期的销量自然增长 (纯美元)
-   */
-  simulateSurge() {
-    this.stores.forEach(store => {
-      store.markets.forEach(m => {
-        // 每个市场每次增量 100 ~ 1,800 美元
-        const increment = Math.floor(100 + Math.random() * 1500);
-        m.sales += increment;
-      });
-    });
-    this.recalculateSales();
-  }
+      amsTotalSales += storeSales;
+      amsTotalOrders += storeOrders;
+      amsTotalTraffic += storeTraffic;
 
-  /**
-   * 核心数据拉取
-   */
-  async fetchData() {
-    let data = null;
-
-    // 尝试请求真实后端接口
-    if (this.apiEndpoint) {
-      try {
-        const resp = await fetch(this.apiEndpoint, { method: 'GET', cache: 'no-cache' });
-        if (resp.ok) {
-          const res = await resp.json();
-          if (res && res.data) {
-            data = this.normalizeData(res.data);
-          }
-        }
-      } catch (e) {
-        // 接口未就绪时静默采用 Mock
+      if (store.type === 'brand') {
+        brandTotalSales += storeSales;
+        brandTotalOrders += storeOrders;
+      } else {
+        panEuTotalSales += storeSales;
+        panEuTotalOrders += storeOrders;
       }
-    }
 
-    if (!data) {
-      this.simulateSurge();
-      data = {
-        amsTotalSales: this.amsTotalSales,
-        stores: this.stores,
-        timestamp: new Date().toISOString()
-      };
-    }
+      const storeAov = storeOrders > 0 ? (storeSales / storeOrders) : 0;
+      const storeConv = storeTraffic > 0 ? ((storeOrders / storeTraffic) * 100) : 5.2;
 
-    this.notify(data);
-    return data;
-  }
-
-  /**
-   * 规范化后端返回的数据结构
-   * 确保无论后端返回 1 个市场还是 10 个市场，均可完美兼容解析
-   */
-  normalizeData(payload) {
-    const rawStores = payload.stores || [];
-    const stores = rawStores.map((s, idx) => {
-      const defaultColors = ['#00f0ff', '#00e5ff', '#7000ff', '#00ff88'];
-      const markets = (s.markets || []).map(m => ({
-        marketName: m.marketName || m.name || m.code || 'Global',
-        sales: Number(m.sales || m.marketSales || 0)
-      }));
-      let total = Number(s.storeSales || s.sales || 0);
-      if (!total && markets.length) {
-        total = markets.reduce((acc, cur) => acc + cur.sales, 0);
-      }
       return {
-        storeName: s.storeName || s.name || `Store ${idx + 1}`,
-        color: s.color || defaultColors[idx % defaultColors.length],
-        storeSales: total,
-        markets: markets
+        ...store,
+        markets,
+        storeSales,
+        storeOrders,
+        storeTraffic,
+        storeAov,
+        storeConversion: storeConv,
+        marketCount: markets.length
       };
     });
 
-    let totalAms = Number(payload.amsTotalSales || payload.totalSales || 0);
-    if (!totalAms && stores.length) {
-      totalAms = stores.reduce((acc, cur) => acc + cur.storeSales, 0);
-    }
+    // 计算各店铺/市场的占比
+    computedStores.forEach(s => {
+      s.sharePercent = amsTotalSales > 0 ? ((s.storeSales / amsTotalSales) * 100).toFixed(1) : '0.0';
+      s.markets.forEach(m => {
+        m.sharePercent = amsTotalSales > 0 ? ((m.sales / amsTotalSales) * 100).toFixed(1) : '0.0';
+      });
+    });
+
+    // 计算最高营收店铺 (Leading Store)
+    const sortedBySales = [...computedStores].sort((a, b) => b.storeSales - a.storeSales);
+    const leadingStore = sortedBySales[0] || computedStores[0];
+
+    // 全站平均客单价与转化率
+    const amsAov = amsTotalOrders > 0 ? (amsTotalSales / amsTotalOrders) : 0;
+    const amsConversion = amsTotalTraffic > 0 ? ((amsTotalOrders / amsTotalTraffic) * 100) : 5.34;
+    // 每小时估算流水 (Combined Run-Rate)
+    const hourlyRunRate = Math.round(amsTotalSales * 0.142);
 
     return {
-      amsTotalSales: totalAms,
-      stores: stores,
-      timestamp: payload.timestamp || new Date().toISOString()
+      timestamp: new Date(),
+      amsTotalSales,
+      amsTotalOrders,
+      amsTotalTraffic,
+      amsAov,
+      amsConversion,
+      hourlyRunRate,
+      leadingStore: {
+        storeName: leadingStore.storeName,
+        sales: leadingStore.storeSales
+      },
+      businessLines: {
+        all: {
+          sales: amsTotalSales,
+          orders: amsTotalOrders
+        },
+        brand: {
+          sales: brandTotalSales,
+          orders: brandTotalOrders
+        },
+        pan_eu: {
+          sales: panEuTotalSales,
+          orders: panEuTotalOrders
+        }
+      },
+      stores: computedStores
     };
   }
 
   /**
-   * 启动10秒后台静默轮询
+   * 10秒脉冲模拟波动 (模拟双11/黑五实时下单增量)
+   */
+  pulseMockData() {
+    this.rawStores.forEach(store => {
+      store.markets.forEach(m => {
+        // 随机产生 1~4 单新订单
+        const newOrders = Math.floor(Math.random() * 4) + 1;
+        // 平均客单价在 80~180 美元波动
+        const incrementalSales = newOrders * (90 + Math.random() * 85);
+
+        m.orders += newOrders;
+        m.sales = Math.round((m.sales + incrementalSales) * 100) / 100;
+        m.traffic += newOrders * (15 + Math.floor(Math.random() * 10));
+      });
+    });
+
+    this.currentData = this.calculateAggregates(this.rawStores);
+    this.notify();
+  }
+
+  /**
+   * 订阅数据更新
+   */
+  onData(callback) {
+    if (typeof callback === 'function') {
+      this.subscribers.push(callback);
+      if (this.currentData) {
+        callback(this.currentData);
+      }
+    }
+  }
+
+  notify() {
+    this.subscribers.forEach(cb => {
+      try {
+        cb(this.currentData);
+      } catch (err) {
+        console.error('DataService subscriber error:', err);
+      }
+    });
+  }
+
+  /**
+   * 启动10秒后台轮询
    */
   startPolling() {
-    this.stopPolling();
-    this.fetchData();
+    if (this.timer) clearInterval(this.timer);
+
     this.timer = setInterval(() => {
-      this.fetchData();
+      // 如果未来后端接口准备好了，可以在此发起 fetch(this.apiEndpoint)
+      // 当前使用符合新协议的 Mock 引擎
+      this.pulseMockData();
     }, this.pollInterval * 1000);
   }
 
@@ -192,15 +261,10 @@ class DataService {
     }
   }
 
-  onData(cb) {
-    this.subscribers.push(cb);
-  }
-
-  notify(data) {
-    this.subscribers.forEach(cb => {
-      try { cb(data); } catch (err) { console.error(err); }
-    });
+  getData() {
+    return this.currentData;
   }
 }
 
+// 单例注入全局
 window.dataService = new DataService();

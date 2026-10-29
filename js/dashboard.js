@@ -1,239 +1,295 @@
 /**
- * AMS 销售看板 - 核心主控逻辑 (纯净版)
+ * AMS 销售看板 - 核心主控逻辑 (新版排版控制器)
  * 职责：
- * 1. 顶部 AMS 总销售额超大数字翻牌器 ($)
- * 2. 实时时钟角标
- * 3. 四大店铺核心销售额与市场概况卡片
- * 4. 多市场销售额数据排行榜表格
- * 5. 视图切换调度 (四店联合对比 / 2x2 四分屏 / 单店下钻)
+ * 1. 实时时间刷新与在线监控
+ * 2. 顶部核心数据区 (全店铺营收、全店铺订单量、全店铺客单价、全店铺转化率)
+ * 3. 中部动量区统计 (总营收、最高收入店铺、最近一小时预估)
+ * 4. 4大店铺独立卡片区 (订单量、营收总额、市场数量与列表、品牌/泛欧标记)
+ * 5. 业务线切换驱动 (全站 / 品牌站 / 泛欧站) 联动图表与详细报表表格
  */
 
 class DashboardController {
   constructor() {
     this.currentData = null;
-    this.activeStoreName = 'all';
+    this.activeBusinessLine = 'all'; // 'all' | 'brand' | 'pan_eu'
   }
 
   init() {
     this.startClock();
 
-    if (window.CyberGlobe) {
-      new CyberGlobe('earthGlobeCanvas');
+    if (window.dashboardCharts) {
+      window.dashboardCharts.init();
     }
 
-    window.dashboardCharts.init();
     this.bindEvents();
 
-    window.dataService.onData(data => this.handleDataUpdate(data));
-    window.dataService.startPolling();
+    if (window.dataService) {
+      window.dataService.onData(data => this.handleDataUpdate(data));
+      window.dataService.startPolling();
+    }
   }
 
   startClock() {
-    const clockEl = document.getElementById('techClockText');
+    const clockEl = document.getElementById('liveClockText');
     const update = () => {
       const now = new Date();
       const pad = n => String(n).padStart(2, '0');
-      const str = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
-      if (clockEl) clockEl.innerText = str;
+      const timeStr = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+      if (clockEl) clockEl.innerText = `Updated ${timeStr}`;
     };
     update();
     setInterval(update, 1000);
   }
 
   bindEvents() {
-    // 视图切换 Tab 按钮
-    const tabBtns = document.querySelectorAll('.view-tab-btn');
-    tabBtns.forEach(btn => {
-      btn.addEventListener('click', e => {
+    // 业务线 Tab 切换 (全站 / 品牌站 / 泛欧站)
+    const bizTabs = document.querySelectorAll('.biz-tab-btn');
+    bizTabs.forEach(tab => {
+      tab.addEventListener('click', e => {
         const target = e.currentTarget;
-        tabBtns.forEach(b => b.classList.remove('active'));
+        bizTabs.forEach(t => t.classList.remove('active'));
         target.classList.add('active');
 
-        const mode = target.dataset.mode;
-        const storeName = target.dataset.store || 'aosom.eu';
-        this.activeStoreName = mode === 'all' || mode === 'quad' ? 'all' : storeName;
-
-        window.dashboardCharts.setViewMode(mode, storeName);
+        this.activeBusinessLine = target.dataset.line || 'all';
         if (this.currentData) {
-          window.dashboardCharts.update(this.currentData);
-          this.renderMarketTable(this.currentData);
+          if (window.dashboardCharts) {
+            window.dashboardCharts.update(this.currentData, this.activeBusinessLine);
+          }
+          this.renderIntelligenceTable(this.currentData, this.activeBusinessLine);
         }
       });
     });
-
-    // 四大店铺卡片点击快速聚焦
-    const storeCards = document.querySelectorAll('.store-kpi-card');
-    storeCards.forEach(card => {
-      card.addEventListener('click', () => {
-        const name = card.dataset.storeName;
-        const targetTab = document.querySelector(`.view-tab-btn[data-store="${name}"]`);
-        if (targetTab) {
-          targetTab.click();
-        }
-      });
-    });
-
-    // 全屏按钮
-    const fullscreenBtn = document.getElementById('fullscreenToggleBtn');
-    if (fullscreenBtn) {
-      fullscreenBtn.addEventListener('click', () => {
-        if (!document.fullscreenElement) {
-          document.documentElement.requestFullscreen().catch(err => console.log(err));
-        } else {
-          document.exitFullscreen();
-        }
-      });
-    }
   }
 
   handleDataUpdate(data) {
+    if (!data) return;
     this.currentData = data;
 
-    // 1. 顶部超大数字翻牌器
-    this.renderAmsTotalCounter(data.amsTotalSales);
+    // 1. 顶部全局营收与订单分析指标
+    this.renderGlobalPerformance(data);
 
-    // 2. 4个店铺的销售额卡片
-    this.renderStoreCards(data);
+    // 2. 中部主图统计指标
+    this.renderLiveMomentumMetrics(data);
 
-    // 3. 多市场销售数据表
-    this.renderMarketTable(data);
+    // 3. 4 大店铺横向卡片
+    this.renderStorefrontCards(data);
 
-    // 4. ECharts 柱状图与占比图
-    window.dashboardCharts.update(data);
-  }
-
-  /**
-   * 渲染顶部 "AMS总销售额" 数字翻牌器 ($)
-   */
-  renderAmsTotalCounter(amount) {
-    const container = document.getElementById('amsFlipCounter');
-    if (!container) return;
-
-    const formattedStr = (Number(amount) || 0).toLocaleString('en-US');
-    const fullStr = `$ ${formattedStr}`;
-
-    let html = '';
-    for (let i = 0; i < fullStr.length; i++) {
-      const char = fullStr[i];
-      if (char === ' ') {
-        html += '<span class="digit-separator-space"></span>';
-      } else if (char === ',') {
-        html += '<span class="digit-box digit-comma">,</span>';
-      } else if (char === '$') {
-        html += `<span class="digit-box digit-symbol">$</span>`;
-      } else {
-        html += `<span class="digit-box digit-number">${char}</span>`;
-      }
+    // 4. ECharts 图表更新
+    if (window.dashboardCharts) {
+      window.dashboardCharts.update(data, this.activeBusinessLine);
     }
 
-    container.innerHTML = html;
+    // 5. 底部业务线与市场情报表格
+    this.renderIntelligenceTable(data, this.activeBusinessLine);
   }
 
   /**
-   * 渲染4大店铺销售额与市场概况卡片
+   * 1. 顶部全局营收指标区
    */
-  renderStoreCards(data) {
+  renderGlobalPerformance(data) {
+    // 全店铺总营收 (USD)
+    const totalRevEl = document.getElementById('globalTotalRevenue');
+    if (totalRevEl) {
+      const num = Number(data.amsTotalSales || 0);
+      const intPart = Math.floor(num).toLocaleString('en-US');
+      const decPart = (num % 1).toFixed(2).substring(1);
+      totalRevEl.innerHTML = `<span class="currency-symbol">$</span>${intPart}<span class="decimal-part">${decPart}</span> <span class="usd-badge">USD</span>`;
+    }
+
+    // 全店铺订单总量
+    const totalOrdersEl = document.getElementById('globalTotalOrders');
+    if (totalOrdersEl) {
+      totalOrdersEl.innerText = Number(data.amsTotalOrders || 0).toLocaleString('en-US');
+    }
+
+    // 全店铺平均客单价 (AOV = 总金额 / 总订单数)
+    const aovEl = document.getElementById('globalAov');
+    if (aovEl) {
+      aovEl.innerText = `$${Number(data.amsAov || 0).toFixed(2)}`;
+    }
+
+    // 全店铺转化率 (订单数 / 访问流量)
+    const convEl = document.getElementById('globalConversionRate');
+    if (convEl) {
+      convEl.innerText = `${Number(data.amsConversion || 0).toFixed(2)}%`;
+    }
+  }
+
+  /**
+   * 2. 中部图表顶部辅助指标
+   */
+  renderLiveMomentumMetrics(data) {
+    // 累积总营收
+    const accumRevEl = document.getElementById('accumulatedRevenueVal');
+    if (accumRevEl) {
+      accumRevEl.innerText = `$${Math.round(data.amsTotalSales || 0).toLocaleString('en-US')}`;
+    }
+
+    // 最高收入店铺
+    const leadingStoreNameEl = document.getElementById('leadingStoreName');
+    const leadingStoreRevEl = document.getElementById('leadingStoreRevenue');
+    if (leadingStoreNameEl && data.leadingStore) {
+      leadingStoreNameEl.innerText = data.leadingStore.storeName;
+    }
+    if (leadingStoreRevEl && data.leadingStore) {
+      leadingStoreRevEl.innerText = `$${Math.round(data.leadingStore.sales).toLocaleString('en-US')} USD`;
+    }
+
+    // 最近一小时预估营收
+    const runRateEl = document.getElementById('hourlyRunRateVal');
+    if (runRateEl) {
+      runRateEl.innerText = `$${Number(data.hourlyRunRate || 0).toLocaleString('en-US')} / hr`;
+    }
+  }
+
+  /**
+   * 3. 四大店铺营收卡片 (Orders by storefront)
+   */
+  renderStorefrontCards(data) {
     data.stores.forEach(store => {
-      const card = document.querySelector(`.store-kpi-card[data-store-name="${store.storeName}"]`);
+      const card = document.querySelector(`.storefront-card[data-store-id="${store.storeId}"]`);
       if (!card) return;
 
-      const salesEl = card.querySelector('.store-sales-val');
-      const shareEl = card.querySelector('.store-share-val');
-      const marketsSummaryEl = card.querySelector('.store-markets-summary');
-
-      const dot = card.querySelector('.brand-status-dot');
-      if (dot && window.dashboardCharts) {
-        const themeColor = window.dashboardCharts.getStoreColor(store.storeName, store.color);
-        dot.style.backgroundColor = themeColor;
-        dot.style.boxShadow = `0 0 6px ${themeColor}`;
+      // 订单数量
+      const ordersEl = card.querySelector('.card-orders-num');
+      if (ordersEl) {
+        ordersEl.innerText = store.storeOrders.toLocaleString('en-US');
       }
 
-      if (salesEl) salesEl.innerText = `$ ${store.storeSales.toLocaleString()}`;
+      // 营收 (USD)
+      const revEl = card.querySelector('.card-revenue-num');
+      if (revEl) {
+        revEl.innerText = `$${store.storeSales.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USD`;
+      }
 
-      const sharePct = ((store.storeSales / (data.amsTotalSales || 1)) * 100).toFixed(1);
-      if (shareEl) shareEl.innerText = `${sharePct}%`;
+      // 市场数量与市场标签预览
+      const marketsCountEl = card.querySelector('.card-markets-count');
+      if (marketsCountEl) {
+        marketsCountEl.innerText = `${store.marketCount} ${store.marketCount === 1 ? 'market' : 'markets'}`;
+      }
 
-      if (marketsSummaryEl) {
-        // 显示包含多少个市场，以及前两三个市场预览
-        const numMarkets = store.markets.length;
-        const marketTags = store.markets.slice(0, 3).map(m => {
-          const kVal = m.sales >= 1000 ? (m.sales / 1000).toFixed(0) + 'k' : m.sales;
-          return `<span class="top-market-chip">${m.marketName} $${kVal}</span>`;
-        }).join('');
-
-        marketsSummaryEl.innerHTML = `
-          <span class="store-market-count-badge">${numMarkets}个市场</span>
-          <div class="store-top-markets-preview">${marketTags}</div>
-        `;
+      const marketListEl = card.querySelector('.card-markets-chips');
+      if (marketListEl) {
+        const preview = store.markets.map(m => m.marketName).join(' · ');
+        marketListEl.innerText = preview;
       }
     });
   }
 
   /**
-   * 渲染多市场销售排行榜表格 (纯美元，清晰对比)
+   * 4. 业务线与市场情报表格 (按业务线筛选)
    */
-  renderMarketTable(data) {
-    const tableBody = document.getElementById('marketTableBody');
+  renderIntelligenceTable(data, businessLine = 'all') {
+    const tableBody = document.getElementById('intelligenceTableBody');
     if (!tableBody) return;
 
-    let marketList = [];
+    // 收集展示行（可展示各店铺，或展开到各店铺的市场明细）
+    let rows = [];
 
-    if (this.activeStoreName !== 'all') {
-      const s = data.stores.find(st => st.storeName === this.activeStoreName);
-      if (s) {
-        const sColor = window.dashboardCharts ? window.dashboardCharts.getStoreColor(s.storeName, s.color) : s.color;
-        marketList = s.markets.map(m => ({
-          storeName: s.storeName,
-          storeColor: sColor,
-          marketName: m.marketName,
-          sales: m.sales
-        }));
-      }
-    } else {
-      data.stores.forEach(s => {
-        const sColor = window.dashboardCharts ? window.dashboardCharts.getStoreColor(s.storeName, s.color) : s.color;
-        s.markets.forEach(m => {
-          marketList.push({
-            storeName: s.storeName,
-            storeColor: sColor,
-            marketName: m.marketName,
-            sales: m.sales
-          });
-        });
-      });
+    let filteredStores = data.stores;
+    if (businessLine === 'brand') {
+      filteredStores = data.stores.filter(s => s.type === 'brand');
+    } else if (businessLine === 'pan_eu') {
+      filteredStores = data.stores.filter(s => s.type === 'pan_eu');
     }
 
-    // 按销售额倒序排列
-    marketList.sort((a, b) => b.sales - a.sales);
+    filteredStores.forEach(store => {
+      // 店铺汇总行
+      rows.push({
+        isStoreSummary: true,
+        storeName: store.storeName,
+        category: store.category,
+        type: store.type,
+        sales: store.storeSales,
+        sharePercent: store.sharePercent,
+        orders: store.storeOrders,
+        aov: store.storeAov,
+        conversion: store.storeConversion,
+        marketCount: store.marketCount
+      });
 
-    const maxSales = marketList[0] ? marketList[0].sales : 1;
+      // 各国家/市场明细行
+      store.markets.forEach(m => {
+        rows.push({
+          isStoreSummary: false,
+          storeName: store.storeName,
+          marketName: m.marketName,
+          sales: m.sales,
+          sharePercent: m.sharePercent,
+          orders: m.orders,
+          aov: m.aov,
+          conversion: m.conversion
+        });
+      });
+    });
 
     let html = '';
-    marketList.slice(0, 10).forEach((item, index) => {
-      const rank = index + 1;
-      const rankBadge = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : `<span class="rank-num">${rank}</span>`;
-      const pct = Math.round((item.sales / maxSales) * 100);
-
-      html += `
-        <tr class="market-row">
-          <td class="col-rank">${rankBadge}</td>
-          <td class="col-store">
-            <span class="store-dot" style="background:${item.storeColor};"></span>
-            <span>${item.storeName}</span>
-          </td>
-          <td class="col-market-name">
-            <span class="market-name-tag">${item.marketName}</span>
-          </td>
-          <td class="col-sales">
-            <div class="val-bar-cell">
-              <span class="usd-val">$ ${item.sales.toLocaleString()}</span>
-              <div class="mini-bar-track">
-                <div class="mini-bar-fill" style="width:${pct}%;"></div>
+    rows.forEach(item => {
+      if (item.isStoreSummary) {
+        // 店铺一级汇总行
+        const typeBadgeClass = item.type === 'brand' ? 'badge-brand' : 'badge-paneu';
+        html += `
+          <tr class="table-row-store-summary">
+            <td class="col-name">
+              <div class="store-badge-cell">
+                <span class="type-tag ${typeBadgeClass}">${item.category}</span>
+                <span class="store-title-text">${item.storeName}</span>
+                <span class="market-sub-count">(${item.marketCount} markets)</span>
               </div>
-            </div>
-          </td>
-        </tr>
-      `;
+            </td>
+            <td class="col-sales">
+              <span class="sales-val-main">$${item.sales.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+            </td>
+            <td class="col-share">
+              <div class="share-cell">
+                <span class="share-pct">${item.sharePercent}%</span>
+                <div class="share-bar-track">
+                  <div class="share-bar-fill" style="width:${item.sharePercent}%;"></div>
+                </div>
+              </div>
+            </td>
+            <td class="col-orders">
+              <span class="orders-val">${item.orders.toLocaleString('en-US')}</span>
+            </td>
+            <td class="col-aov">
+              <span class="aov-val">$${item.aov.toFixed(2)}</span>
+            </td>
+            <td class="col-conv">
+              <span class="conv-val">${item.conversion.toFixed(2)}%</span>
+            </td>
+          </tr>
+        `;
+      } else {
+        // 市场二级明细行
+        html += `
+          <tr class="table-row-market-detail">
+            <td class="col-name indent-cell">
+              <span class="market-country-flag">${item.marketName}</span>
+              <span class="market-detail-name">${item.storeName} - ${item.marketName} 市场</span>
+            </td>
+            <td class="col-sales">
+              <span class="sales-val-sub">$${item.sales.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+            </td>
+            <td class="col-share">
+              <div class="share-cell">
+                <span class="share-pct-sub">${item.sharePercent}%</span>
+                <div class="share-bar-track sub-track">
+                  <div class="share-bar-fill sub-fill" style="width:${Math.min(100, item.sharePercent * 2)}%;"></div>
+                </div>
+              </div>
+            </td>
+            <td class="col-orders">
+              <span class="orders-val-sub">${item.orders.toLocaleString('en-US')}</span>
+            </td>
+            <td class="col-aov">
+              <span class="aov-val-sub">$${item.aov.toFixed(2)}</span>
+            </td>
+            <td class="col-conv">
+              <span class="conv-val-sub">${item.conversion.toFixed(2)}%</span>
+            </td>
+          </tr>
+        `;
+      }
     });
 
     tableBody.innerHTML = html;

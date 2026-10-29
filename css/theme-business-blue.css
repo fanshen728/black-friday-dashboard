@@ -1,23 +1,26 @@
 @charset "utf-8";
 
 /* ==========================================================================
-   AMS 全球电商黑五销量大屏 - 商务科技蓝 (Business Navy Blue)
-   设计风格：企业级数据驾驶舱、沉稳大气、无光污染、高清晰度、适合高管汇报
+   AMS 全球电商黑五销量看板 - 商务科技蓝 (Business Navy Blue)
+   排版结构：复刻 Command Center 现代化布局 (指标区 + 动量柱图 + 店铺卡片 + 业务线智能报表)
    ========================================================================== */
 
 :root {
   --bg-dark-base: #070e24;
-  --bg-card: rgba(12, 26, 62, 0.72);
-  --bg-card-hover: rgba(18, 38, 90, 0.85);
+  --bg-card: rgba(12, 26, 62, 0.75);
+  --bg-card-sub: rgba(18, 38, 90, 0.55);
+  --bg-card-hover: rgba(22, 48, 110, 0.85);
   --border-card: rgba(59, 130, 246, 0.28);
   --border-card-hover: rgba(59, 130, 246, 0.6);
-  --border-glow: 0 4px 20px rgba(0, 0, 0, 0.35);
-  
+  --border-accent: #3b82f6;
+
   --primary-blue: #2563eb;
   --primary-light: #60a5fa;
   --accent-cyan: #06b6d4;
   --accent-gold: #f59e0b;
   --accent-green: #10b981;
+  --accent-purple: #8b5cf6;
+
   --text-main: #f8fafc;
   --text-muted: #94a3b8;
   --text-dim: #64748b;
@@ -32,180 +35,126 @@
 
 html, body {
   width: 100%;
-  height: 100%;
-  min-width: 1280px;
-  min-height: 720px;
-  overflow: hidden;
+  min-height: 100%;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
   background-color: var(--bg-dark-base);
   color: var(--text-main);
   user-select: none;
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
-/* ================== 全局大屏背景 ================== */
+/* 全局滚动条美化 */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: rgba(7, 14, 36, 0.8);
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(59, 130, 246, 0.35);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(59, 130, 246, 0.6);
+}
+
 .dashboard-screen {
   position: relative;
   width: 100%;
-  height: 100%;
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
-  background: url("../img/bg-business-blue.jpg?v=20261029") center center / cover no-repeat, #070e24;
-  overflow: hidden;
+  background: url("../img/bg-business-blue.jpg?v=20261029") center top / cover fixed no-repeat, #070e24;
 }
 
-/* ================== 顶部 Header ================== */
+/* ================== 1. 顶部 Header ================== */
 .dashboard-header {
-  position: relative;
-  height: 92px;
+  height: 62px;
   flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 24px;
-  border-bottom: 1px solid rgba(59, 130, 246, 0.22);
-  background: linear-gradient(180deg, rgba(10, 22, 54, 0.92) 0%, rgba(7, 16, 40, 0.65) 100%);
-  z-index: 10;
-}
-
-.header-top-accent {
-  position: absolute;
+  padding: 0 28px;
+  border-bottom: 1px solid rgba(59, 130, 246, 0.2);
+  background: rgba(9, 20, 50, 0.88);
+  backdrop-filter: blur(12px);
+  position: sticky;
   top: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 500px;
-  height: 3px;
-  background: linear-gradient(90deg, transparent, #3b82f6, #93c5fd, #3b82f6, transparent);
-  box-shadow: 0 0 12px rgba(59, 130, 246, 0.5);
+  z-index: 100;
 }
 
-.header-left-zone {
+.header-brand-zone {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.brand-icon-box {
+  width: 32px;
+  height: 32px;
+  background: linear-gradient(135deg, #1d4ed8, #3b82f6);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.4);
+}
+
+.brand-title-wrap {
+  display: flex;
+  flex-direction: column;
+}
+
+.brand-sub-badge {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  color: #60a5fa;
+  text-transform: uppercase;
+}
+
+.brand-main-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: 0.5px;
+}
+
+.header-actions-zone {
   display: flex;
   align-items: center;
   gap: 14px;
-  flex-shrink: 0;
-  z-index: 12;
 }
 
-.globe-wrapper {
-  position: relative;
-  width: 72px;
-  height: 72px;
-  flex-shrink: 0;
-}
-
-#earthGlobeCanvas {
-  width: 100%;
-  height: 100%;
-  display: block;
-}
-
-.tech-clock-badge {
+.live-pulse-badge {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 6px 14px;
-  background: rgba(30, 58, 138, 0.35);
-  border: 1px solid rgba(59, 130, 246, 0.35);
-  border-radius: 6px;
+  gap: 7px;
   font-family: var(--font-mono);
-  font-size: 13px;
-  color: #bfdbfe;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
-  white-space: nowrap;
+  font-size: 12px;
+  color: var(--text-muted);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 4px 10px;
+  border-radius: 20px;
 }
 
-.tech-lines {
-  color: rgba(96, 165, 250, 0.6);
-  letter-spacing: -2px;
-  font-weight: bold;
+.pulse-dot {
+  width: 6px;
+  height: 6px;
+  background: #10b981;
+  border-radius: 50%;
+  box-shadow: 0 0 8px #10b981;
+  animation: pulse-ring 2s infinite;
 }
 
-/* 顶部中间：AMS 总销售额舞台与翻牌器 */
-.header-center-zone {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  pointer-events: auto;
-}
-
-.ams-title-wrapper {
-  margin-bottom: 4px;
-}
-
-.ams-header-title {
-  font-size: 20px;
-  font-weight: 700;
-  letter-spacing: 2px;
-  color: #f1f5f9;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
-}
-
-.ams-counter-stage {
-  padding: 4px 18px;
-  background: linear-gradient(180deg, rgba(30, 58, 138, 0.45) 0%, rgba(15, 30, 75, 0.6) 100%);
-  border: 1px solid rgba(96, 165, 250, 0.35);
-  border-radius: 8px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.15);
-}
-
-.ams-flip-counter {
-  display: flex;
-  align-items: center;
-  gap: 3px;
-}
-
-.digit-box {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 34px;
-  height: 44px;
-  background: linear-gradient(180deg, #1e3a8a 0%, #0f245c 100%);
-  border: 1px solid rgba(147, 197, 253, 0.4);
-  border-radius: 5px;
-  color: #ffffff;
-  font-family: var(--font-mono);
-  font-size: 30px;
-  font-weight: 800;
-  padding: 0 4px;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 2px 6px rgba(0, 0, 0, 0.3);
-}
-
-.digit-symbol {
-  background: transparent;
-  border: none;
-  box-shadow: none;
-  color: #60a5fa;
-  font-size: 24px;
-  min-width: 18px;
-  margin-right: 2px;
-}
-
-.digit-comma {
-  background: transparent;
-  border: none;
-  box-shadow: none;
-  color: #94a3b8;
-  font-size: 24px;
-  min-width: 10px;
-  align-self: flex-end;
-  margin-bottom: 2px;
-}
-
-.digit-separator-space {
-  width: 4px;
-}
-
-/* 顶部右侧控制区 (带全屏与版本切换) */
-.header-right-zone {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  z-index: 12;
+@keyframes pulse-ring {
+  0% { transform: scale(0.95); opacity: 0.8; }
+  50% { transform: scale(1.3); opacity: 1; }
+  100% { transform: scale(0.95); opacity: 0.8; }
 }
 
 /* 版本切换胶囊条 */
@@ -214,8 +163,8 @@ html, body {
   align-items: center;
   gap: 4px;
   padding: 3px 6px;
-  background: rgba(15, 30, 75, 0.65);
-  border: 1px solid rgba(59, 130, 246, 0.3);
+  background: rgba(15, 30, 75, 0.7);
+  border: 1px solid rgba(59, 130, 246, 0.35);
   border-radius: 20px;
 }
 
@@ -247,431 +196,668 @@ html, body {
 .fullscreen-btn {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 6px 14px;
-  background: rgba(30, 58, 138, 0.35);
-  border: 1px solid rgba(59, 130, 246, 0.35);
+  gap: 5px;
+  padding: 5px 12px;
+  background: rgba(37, 99, 235, 0.2);
+  border: 1px solid rgba(59, 130, 246, 0.4);
   border-radius: 6px;
-  color: #bfdbfe;
+  color: #93c5fd;
   font-size: 12px;
   cursor: pointer;
   transition: all 0.2s;
 }
 
 .fullscreen-btn:hover {
-  background: rgba(37, 99, 235, 0.4);
+  background: #2563eb;
   color: #fff;
-  border-color: #60a5fa;
 }
 
-/* ================== 主体布局 ================== */
-.dashboard-main {
+/* ================== 页面主要内容区 ================== */
+.dashboard-content {
   flex: 1;
   display: flex;
   flex-direction: column;
-  padding: 12px 18px 14px 18px;
-  gap: 12px;
-  overflow: hidden;
+  padding: 18px 28px 30px 28px;
+  gap: 18px;
+  max-width: 1920px;
+  margin: 0 auto;
+  width: 100%;
 }
 
-/* 四大店铺 KPI 横向卡片组 */
-.stores-kpi-row {
+/* 通用模块标题头 */
+.section-meta-header {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 10px;
+}
+
+.section-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  color: var(--primary-light);
+  text-transform: uppercase;
+}
+
+.section-title {
+  font-size: 17px;
+  font-weight: 700;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ================== 2. Section: Global Performance ================== */
+.global-performance-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 12px;
-  height: 104px;
-  flex-shrink: 0;
+  grid-template-columns: 1.15fr 1fr;
+  gap: 16px;
 }
 
-.store-kpi-card {
-  position: relative;
+.kpi-master-card {
   background: var(--bg-card);
   border: 1px solid var(--border-card);
   border-radius: 8px;
-  padding: 12px 16px;
+  padding: 16px 22px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  cursor: pointer;
-  transition: all 0.25s ease;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  position: relative;
   overflow: hidden;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
 }
 
-.store-kpi-card:hover {
+.kpi-master-card::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(90deg, #3b82f6, #60a5fa, transparent);
+}
+
+.kpi-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.kpi-title-text {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+.kpi-icon-pill {
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  background: rgba(59, 130, 246, 0.15);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #93c5fd;
+  font-size: 13px;
+}
+
+.revenue-huge-val {
+  font-family: var(--font-mono);
+  font-size: 38px;
+  font-weight: 800;
+  color: #ffffff;
+  letter-spacing: -0.5px;
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  margin: 4px 0 10px 0;
+}
+
+.revenue-huge-val .currency-symbol {
+  font-size: 26px;
+  color: #60a5fa;
+  font-weight: 700;
+}
+
+.revenue-huge-val .decimal-part {
+  font-size: 24px;
+  color: #94a3b8;
+}
+
+.revenue-huge-val .usd-badge {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-muted);
+  margin-left: 6px;
+  background: rgba(255, 255, 255, 0.06);
+  padding: 2px 6px;
+  border-radius: 3px;
+}
+
+.revenue-accent-bar {
+  width: 100%;
+  height: 4px;
+  background: linear-gradient(90deg, #f59e0b 0%, #3b82f6 50%, #10b981 100%);
+  border-radius: 2px;
+}
+
+.orders-master-num {
+  font-family: var(--font-mono);
+  font-size: 36px;
+  font-weight: 800;
+  color: #ffffff;
+  letter-spacing: -0.5px;
+  margin: 2px 0;
+}
+
+.orders-sub-note {
+  font-size: 11px;
+  color: #34d399;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 12px;
+}
+
+.sub-metrics-split-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.sub-metric-block {
+  display: flex;
+  flex-direction: column;
+}
+
+.sub-metric-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+}
+
+.sub-metric-val {
+  font-family: var(--font-mono);
+  font-size: 18px;
+  font-weight: 700;
+  color: #93c5fd;
+  margin-top: 2px;
+}
+
+/* ================== 3. Section: Live Momentum (单店铺营收纵向大柱图) ================== */
+.momentum-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-card);
+  border-radius: 8px;
+  padding: 16px 22px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+}
+
+.momentum-top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.momentum-title-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.momentum-icon-pulse {
+  color: #38bdf8;
+  font-size: 16px;
+}
+
+.momentum-metrics-group {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.momentum-metric-item {
+  display: flex;
+  flex-direction: column;
+  text-align: right;
+}
+
+.m-label {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-dim);
+  letter-spacing: 0.5px;
+}
+
+.m-val {
+  font-family: var(--font-mono);
+  font-size: 16px;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.m-val-highlight {
+  color: #60a5fa;
+}
+
+.m-val-gold {
+  color: #f59e0b;
+}
+
+.single-store-chart-container {
+  width: 100%;
+  height: 310px;
+  margin-top: 10px;
+}
+
+/* ================== 4. Section: Orders by storefront (4个店铺卡片) ================== */
+.storefronts-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+}
+
+.storefront-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-card);
+  border-radius: 8px;
+  padding: 14px 18px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+  transition: all 0.25s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.storefront-card:hover {
   background: var(--bg-card-hover);
   border-color: var(--border-card-hover);
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(37, 99, 235, 0.25);
 }
 
-.store-card-header {
+.storefront-card-top {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  margin-bottom: 8px;
 }
 
-.store-brand-info {
+.store-id-name-wrap {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
 }
 
-.brand-status-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  flex-shrink: 0;
+.store-idx {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-dim);
+  font-weight: 700;
 }
 
-.store-name-text {
-  font-size: 15px;
+.store-name-bold {
+  font-size: 14px;
   font-weight: 700;
   color: #ffffff;
 }
 
-.store-category-tag {
-  font-size: 11px;
-  color: var(--text-muted);
-  background: rgba(255, 255, 255, 0.06);
-  padding: 2px 7px;
-  border-radius: 4px;
+.store-type-badge {
+  font-size: 10px;
+  font-weight: 600;
+  padding: 1px 6px;
+  border-radius: 3px;
+  background: rgba(37, 99, 235, 0.2);
+  border: 1px solid rgba(59, 130, 246, 0.35);
+  color: #93c5fd;
 }
 
-.store-share-percent {
-  font-size: 12px;
-  color: var(--text-muted);
-  font-family: var(--font-mono);
+.store-type-badge.paneu {
+  background: rgba(245, 158, 11, 0.15);
+  border-color: rgba(245, 158, 11, 0.35);
+  color: #fef08a;
 }
 
-.store-share-val {
-  color: #60a5fa;
-  font-weight: 700;
-}
-
-.store-card-body {
+.store-status-online {
+  font-size: 10px;
+  color: #34d399;
+  font-weight: 600;
   display: flex;
-  align-items: baseline;
+  align-items: center;
   gap: 4px;
 }
 
-.store-currency-symbol {
-  font-size: 16px;
-  font-weight: 700;
-  color: #60a5fa;
-  font-family: var(--font-mono);
+.store-card-middle {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin: 6px 0;
 }
 
-.store-sales-val {
+.card-orders-num {
   font-family: var(--font-mono);
   font-size: 24px;
   font-weight: 800;
   color: #ffffff;
+}
+
+.orders-unit-label {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-left: 2px;
+}
+
+.card-revenue-box {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.revenue-tiny-label {
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--text-dim);
   letter-spacing: 0.5px;
 }
 
-.store-card-footer {
+.card-revenue-num {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 700;
+  color: #60a5fa;
+}
+
+.storefront-card-bottom {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
   font-size: 11px;
 }
 
-.store-market-count-badge {
-  display: inline-flex;
-  align-items: center;
-  padding: 2px 8px;
-  background: rgba(37, 99, 235, 0.2);
-  border: 1px solid rgba(59, 130, 246, 0.4);
-  border-radius: 4px;
-  color: #93c5fd;
+.card-markets-chips {
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 140px;
+}
+
+.card-markets-count {
+  font-size: 11px;
+  color: var(--text-dim);
   font-weight: 600;
 }
 
-.store-top-markets-preview {
-  display: flex;
-  gap: 6px;
-  overflow: hidden;
-}
-
-.top-market-chip {
-  color: #cbd5e1;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  padding: 1px 6px;
-  border-radius: 3px;
-  font-family: var(--font-mono);
-  font-size: 11px;
-  white-space: nowrap;
-}
-
-/* ================== 下半部分布局 ================== */
-.dashboard-main-grid {
-  flex: 1;
-  display: grid;
-  grid-template-columns: 2.1fr 1fr;
-  gap: 14px;
-  min-height: 0;
-}
-
-/* 商务卡片通用 */
-.hud-card {
-  position: relative;
+/* ================== 5. Section: Market Intelligence (业务线与智能分析表格) ================== */
+.market-intelligence-card {
   background: var(--bg-card);
   border: 1px solid var(--border-card);
   border-radius: 8px;
+  padding: 16px 22px;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  gap: 14px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
 }
 
-.hud-corner {
-  display: none; /* 商务版去掉赛博折角，体现现代极简圆润 */
-}
-
-.hud-card-header {
-  height: 44px;
-  flex-shrink: 0;
+.intelligence-top-bar {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 16px;
-  border-bottom: 1px solid rgba(59, 130, 246, 0.18);
-  background: rgba(30, 58, 138, 0.18);
+  flex-wrap: wrap;
+  gap: 12px;
 }
 
-.hud-card-title {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 15px;
-  font-weight: 700;
-  color: #f1f5f9;
-}
-
-.title-icon-bar {
-  width: 4px;
-  height: 14px;
-  background: #3b82f6;
-  border-radius: 2px;
-}
-
-/* 视图切换 Tab 组 */
-.view-tabs-group {
+/* 业务线切换 Tabs */
+.biz-tabs-group {
   display: flex;
   align-items: center;
   gap: 6px;
+  background: rgba(0, 0, 0, 0.25);
+  padding: 3px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-.view-tab-btn {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  color: var(--text-muted);
-  padding: 4px 10px;
-  font-size: 12px;
+.biz-tab-btn {
+  padding: 4px 12px;
   border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  background: transparent;
+  border: none;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
-.view-tab-btn:hover {
+.biz-tab-btn:hover {
   color: #ffffff;
-  border-color: rgba(59, 130, 246, 0.5);
-  background: rgba(59, 130, 246, 0.15);
 }
 
-.view-tab-btn.active {
+.biz-tab-btn.active {
   background: #2563eb;
-  border-color: #3b82f6;
   color: #ffffff;
-  font-weight: 600;
-  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.35);
+  box-shadow: 0 2px 6px rgba(37, 99, 235, 0.4);
 }
 
-.hud-card-body {
-  flex: 1;
-  position: relative;
-  min-height: 0;
-  overflow: hidden;
-}
-
-#mainBarChartContainer {
-  width: 100%;
-  height: 100%;
-}
-
-#mainBarChart {
-  width: 100%;
-  height: 100%;
-}
-
-/* 2x2 四分屏独立矩阵 */
-#quadViewContainer {
-  display: none;
-  grid-template-columns: 1fr 1fr;
-  grid-template-rows: 1fr 1fr;
-  gap: 8px;
-  width: 100%;
-  height: 100%;
-  padding: 8px;
-}
-
-.quad-item {
-  position: relative;
-  background: rgba(10, 22, 54, 0.6);
-  border: 1px solid rgba(59, 130, 246, 0.2);
-  border-radius: 6px;
-  display: flex;
-  flex-direction: column;
-}
-
-.quad-item-title {
-  height: 24px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 10px;
+.currency-tag-indicator {
   font-size: 11px;
-  font-weight: 700;
-  background: rgba(30, 58, 138, 0.2);
-  border-bottom: 1px solid rgba(59, 130, 246, 0.15);
-  color: #bfdbfe;
+  font-weight: 600;
+  color: var(--text-dim);
+  background: rgba(255, 255, 255, 0.05);
+  padding: 3px 8px;
+  border-radius: 4px;
 }
 
-.quad-chart-canvas {
-  flex: 1;
+/* 店铺排名横向条形图 */
+.horizontal-rank-chart-box {
   width: 100%;
-  min-height: 0;
+  height: 140px;
 }
 
-/* 右侧边栏 */
-.dashboard-sidebar {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  min-height: 0;
-}
-
-.sidebar-half-card {
-  flex: 1;
-  min-height: 0;
-}
-
-/* 商务排行榜表格 */
-.market-table-wrapper {
+/* 智能报表表格 */
+.intelligence-table-wrapper {
   width: 100%;
-  height: 100%;
-  overflow-y: auto;
-  padding: 4px 8px;
+  overflow-x: auto;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
 }
 
-.market-table-wrapper::-webkit-scrollbar {
-  width: 4px;
-}
-.market-table-wrapper::-webkit-scrollbar-thumb {
-  background: rgba(59, 130, 246, 0.3);
-  border-radius: 2px;
-}
-
-.tech-market-table {
+.intel-table {
   width: 100%;
   border-collapse: collapse;
   font-size: 12px;
-}
-
-.tech-market-table th {
-  position: sticky;
-  top: 0;
-  background: rgba(12, 26, 62, 0.98);
-  color: var(--text-muted);
-  font-weight: 600;
   text-align: left;
-  padding: 6px 8px;
-  border-bottom: 1px solid rgba(59, 130, 246, 0.2);
-  z-index: 2;
 }
 
-.tech-market-table td {
-  padding: 7px 8px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+.intel-table th {
+  background: rgba(10, 22, 54, 0.98);
+  color: var(--text-dim);
+  font-weight: 700;
+  font-size: 10px;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  padding: 9px 12px;
+  border-bottom: 1px solid rgba(59, 130, 246, 0.25);
+}
+
+.intel-table td {
+  padding: 9px 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
   color: #e2e8f0;
 }
 
-.market-row:hover {
-  background: rgba(59, 130, 246, 0.12);
+/* 一级店铺汇总行 */
+.table-row-store-summary {
+  background: rgba(30, 58, 138, 0.16);
+  font-weight: 600;
 }
 
-.col-rank {
-  width: 38px;
-  text-align: center;
+.table-row-store-summary:hover {
+  background: rgba(30, 58, 138, 0.3);
 }
 
-.rank-num {
-  font-family: var(--font-mono);
-  font-weight: 700;
-  color: var(--text-muted);
-}
-
-.col-store {
+.store-badge-cell {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-weight: 600;
-  color: #ffffff;
-  white-space: nowrap;
 }
 
-.store-dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  flex-shrink: 0;
+.type-tag {
+  font-size: 10px;
+  padding: 1px 6px;
+  border-radius: 3px;
+  font-weight: 700;
 }
 
-.col-market-name {
-  width: 80px;
-}
-
-.market-name-tag {
-  display: inline-block;
-  padding: 2px 8px;
-  background: rgba(37, 99, 235, 0.15);
-  border: 1px solid rgba(59, 130, 246, 0.35);
+.type-tag.badge-brand {
+  background: rgba(37, 99, 235, 0.25);
+  border: 1px solid rgba(59, 130, 246, 0.4);
   color: #93c5fd;
-  border-radius: 4px;
-  font-family: var(--font-mono);
+}
+
+.type-tag.badge-paneu {
+  background: rgba(245, 158, 11, 0.2);
+  border: 1px solid rgba(245, 158, 11, 0.45);
+  color: #fef08a;
+}
+
+.store-title-text {
+  font-size: 13px;
+  color: #ffffff;
   font-weight: 700;
+}
+
+.market-sub-count {
   font-size: 11px;
-  text-align: center;
+  color: var(--text-dim);
+  font-family: var(--font-mono);
 }
 
-.col-sales {
-  min-width: 140px;
-}
-
-.val-bar-cell {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.usd-val {
+.sales-val-main {
   font-family: var(--font-mono);
   font-weight: 700;
-  color: #34d399;
+  color: #ffffff;
   font-size: 13px;
 }
 
-.mini-bar-track {
-  width: 100%;
-  height: 3px;
+/* 二级市场明细行 */
+.table-row-market-detail {
+  background: transparent;
+}
+
+.table-row-market-detail:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.indent-cell {
+  padding-left: 28px !important;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.market-country-flag {
+  display: inline-block;
+  padding: 1px 6px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 3px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  color: #93c5fd;
+}
+
+.market-detail-name {
+  color: var(--text-muted);
+}
+
+.sales-val-sub {
+  font-family: var(--font-mono);
+  color: #94a3b8;
+}
+
+/* 进度条占比 */
+.share-cell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 130px;
+}
+
+.share-pct {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 700;
+  color: #93c5fd;
+  min-width: 38px;
+}
+
+.share-pct-sub {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-dim);
+  min-width: 38px;
+}
+
+.share-bar-track {
+  flex: 1;
+  height: 4px;
   background: rgba(255, 255, 255, 0.08);
   border-radius: 2px;
   overflow: hidden;
 }
 
-.mini-bar-fill {
+.share-bar-fill {
   height: 100%;
-  background: linear-gradient(90deg, #3b82f6, #10b981);
+  background: linear-gradient(90deg, #2563eb, #60a5fa);
+  border-radius: 2px;
+}
+
+.share-bar-fill.sub-fill {
+  background: #3b82f6;
+  opacity: 0.6;
+}
+
+.orders-val, .orders-val-sub, .aov-val, .aov-val-sub, .conv-val, .conv-val-sub {
+  font-family: var(--font-mono);
+}
+
+.orders-val {
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.aov-val {
+  color: #34d399;
+  font-weight: 700;
+}
+
+.conv-val {
+  color: #38bdf8;
+  font-weight: 700;
 }
