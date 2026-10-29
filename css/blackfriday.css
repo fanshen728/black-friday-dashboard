@@ -45,19 +45,8 @@ html, body {
   height: 100%;
   display: flex;
   flex-direction: column;
-  background: url("../img/dashboard-bg.jpg") center center / cover no-repeat, #03081a;
+  background: url("../img/dashboard-bg.jpg?v=20261029_sharp") center bottom / cover no-repeat, #03081a;
   overflow: hidden;
-}
-
-/* 微妙科技扫描线特效 (可选轻量层) */
-.dashboard-screen::before {
-  content: "";
-  position: absolute;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.08) 50%);
-  background-size: 100% 4px;
-  pointer-events: none;
-  z-index: 999;
 }
 
 /* ================== 顶部科技 Header (复刻图一上部) ================== */
@@ -70,9 +59,7 @@ html, body {
   justify-content: space-between;
   padding: 0 24px;
   border-bottom: 1px solid rgba(0, 240, 255, 0.25);
-  background: linear-gradient(180deg, rgba(6, 18, 48, 0.65) 0%, rgba(4, 12, 34, 0.35) 100%);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  background: linear-gradient(180deg, rgba(6, 18, 48, 0.72) 0%, rgba(4, 12, 34, 0.42) 100%);
   z-index: 10;
 }
 
@@ -310,8 +297,6 @@ html, body {
 .store-kpi-card {
   position: relative;
   background: var(--bg-card);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
   border: 1px solid rgba(0, 240, 255, 0.28);
   border-radius: 6px;
   padding: 10px 14px;
@@ -451,8 +436,6 @@ html, body {
 .hud-card {
   position: relative;
   background: var(--bg-card);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
   border: 1px solid rgba(0, 240, 255, 0.3);
   border-radius: 6px;
   display: flex;
