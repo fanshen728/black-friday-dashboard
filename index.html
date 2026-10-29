@@ -11,17 +11,22 @@
     <!-- ================== 1. 顶部 Header ================== -->
     <header class="dashboard-header">
       <div class="header-brand-zone">
-        <div class="brand-icon-box">📊</div>
+        <!-- 3D 科技地球仪 -->
+        <div class="globe-wrapper" title="出海全球多市场航线网络">
+          <canvas id="earthGlobeCanvas"></canvas>
+        </div>
         <div class="brand-title-wrap">
-          <span class="brand-sub-badge" data-i18n="subBadge">AMS 电商运营指挥平台</span>
-          <h1 class="brand-main-title" data-i18n="mainTitle">AMS 黑五全球销售作战指挥中心</h1>
+          <span class="brand-sub-badge" data-i18n="subBadge">AMS COMMERCE OPS</span>
+          <h1 class="brand-main-title" data-i18n="mainTitle">ams销量看板</h1>
         </div>
       </div>
 
       <div class="header-actions-zone">
-        <div class="live-pulse-badge">
+        <!-- 实时科技时钟 -->
+        <div class="tech-clock-badge" title="当前实时时间">
           <span class="pulse-dot"></span>
-          <span id="liveClockText">数据已更新 13:17:38</span>
+          <span id="techClockText">2026-10-29 14:40:00</span>
+          <span class="tech-lines">\\\\</span>
         </div>
 
         <!-- 中英文语言一键切换 -->
@@ -297,6 +302,7 @@
   </script>
   <script src="js/i18n.js"></script>
   <script src="js/dataService.js"></script>
+  <script src="js/globe.js"></script>
   <script src="js/charts.js"></script>
   <script src="js/dashboard.js"></script>
   <script>

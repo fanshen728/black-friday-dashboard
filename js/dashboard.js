@@ -26,6 +26,10 @@ class DashboardController {
 
     this.startClock();
 
+    if (window.CyberGlobe) {
+      new CyberGlobe('earthGlobeCanvas');
+    }
+
     if (window.dashboardCharts) {
       window.dashboardCharts.init();
     }
@@ -39,13 +43,20 @@ class DashboardController {
   }
 
   startClock() {
-    const clockEl = document.getElementById('liveClockText');
+    const techClockEl = document.getElementById('techClockText');
+    const liveClockEl = document.getElementById('liveClockText');
     const update = () => {
       const now = new Date();
       const pad = n => String(n).padStart(2, '0');
+      const dateStr = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
       const timeStr = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
-      const prefix = window.i18n ? window.i18n.t('updatedPrefix', 'Updated') : 'Updated';
-      if (clockEl) clockEl.innerText = `${prefix} ${timeStr}`;
+      if (techClockEl) {
+        techClockEl.innerText = `${dateStr} ${timeStr}`;
+      }
+      if (liveClockEl) {
+        const prefix = window.i18n ? window.i18n.t('updatedPrefix', 'Updated') : 'Updated';
+        liveClockEl.innerText = `${prefix} ${timeStr}`;
+      }
     };
     update();
     setInterval(update, 1000);

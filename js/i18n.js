@@ -7,8 +7,8 @@
 const I18N_TRANSLATIONS = {
   zh: {
     // 顶部 Header
-    subBadge: 'AMS 电商运营指挥平台',
-    mainTitle: 'AMS 黑五全球销售作战指挥中心',
+    subBadge: 'AMS COMMERCE OPS',
+    mainTitle: 'ams销量看板',
     updatedPrefix: '数据已更新',
     fullscreen: '全屏',
     themePillBlue: '🏢 商务科技蓝',
@@ -74,7 +74,7 @@ const I18N_TRANSLATIONS = {
   en: {
     // Header
     subBadge: 'AMS COMMERCE OPS',
-    mainTitle: 'AMS Black Friday Global Command Center',
+    mainTitle: 'AMS Sales Dashboard',
     updatedPrefix: 'Updated',
     fullscreen: 'Fullscreen',
     themePillBlue: '🏢 Business Blue',
