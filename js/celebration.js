@@ -64,6 +64,7 @@ class MilestoneCelebrationEngine {
     this.fireworkGroup = null;
     this.confettiGroup = null;
     this.particleTexture = null;
+    this.digitParticleTexture = null;
 
     // 粒子与物理数据
     this.digitParticleData = [];
@@ -178,10 +179,16 @@ class MilestoneCelebrationEngine {
       this.close();
     });
 
-    // ESC 键退出
+    // ESC 键退出，按 'M' 键快速演示触发突破特效，按 '5' 键测试 5,000，按 '1' 键测试 10,000
     window.addEventListener('keydown', (e) => {
       if (e.key === 'Escape' && this.isActive) {
         this.close();
+      } else if ((e.key === 'm' || e.key === 'M') && !this.isActive) {
+        this.launchTier('live');
+      } else if (e.key === '5' && !this.isActive) {
+        window.triggerMilestoneFx(5000);
+      } else if (e.key === '1' && !this.isActive) {
+        window.triggerMilestoneFx(10000);
       }
     });
   }
@@ -223,6 +230,49 @@ class MilestoneCelebrationEngine {
 
     this.particleTexture = new THREE.CanvasTexture(canvas);
     return this.particleTexture;
+  }
+
+  /**
+   * 生成专用于数字点阵的高锐度钻石星芒粒子贴图 (实打实清晰，杜绝毛糙与模糊)
+   */
+  getOrCreateDigitParticleTexture() {
+    if (this.digitParticleTexture) return this.digitParticleTexture;
+
+    const size = 128;
+    const canvas = document.createElement('canvas');
+    canvas.width = size;
+    canvas.height = size;
+    const ctx = canvas.getContext('2d');
+    const c = size / 2;
+
+    // 1. 实心高亮圆形核心：纯粹星钻核心，兼顾粒子点阵质感与笔画清晰度
+    const grad = ctx.createRadialGradient(c, c, 0, c, c, c * 0.85);
+    grad.addColorStop(0, 'rgba(255, 255, 255, 1)');
+    grad.addColorStop(0.35, 'rgba(255, 255, 255, 0.95)');
+    grad.addColorStop(0.65, 'rgba(255, 255, 255, 0.65)');
+    grad.addColorStop(0.85, 'rgba(255, 255, 255, 0.15)');
+    grad.addColorStop(1, 'rgba(255, 255, 255, 0)');
+
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.arc(c, c, c * 0.85, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 2. 细腻星钻十字微芒 (强化纯粒子立体星钻质感)
+    ctx.save();
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.75)';
+    ctx.beginPath();
+    ctx.moveTo(c, 4);
+    ctx.quadraticCurveTo(c, c, size - 4, c);
+    ctx.quadraticCurveTo(c, c, c, size - 4);
+    ctx.quadraticCurveTo(c, c, 4, c);
+    ctx.quadraticCurveTo(c, c, c, 4);
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+
+    this.digitParticleTexture = new THREE.CanvasTexture(canvas);
+    return this.digitParticleTexture;
   }
 
   /**
@@ -368,27 +418,30 @@ class MilestoneCelebrationEngine {
    * 将文字/数字栅格化为真 3D 空间发光粒子点阵
    */
   buildDigitParticles(text, tier = '5k') {
-    // 清空现存数字粒子组
+    // 清空现存数字粒子组 (保护共享贴图避免误释放)
     while (this.digitGroup.children.length > 0) {
       const obj = this.digitGroup.children[0];
       if (obj.geometry) obj.geometry.dispose();
       if (obj.material) {
-        if (obj.material.map) obj.material.map.dispose();
+        if (obj.material.map && obj.material.map !== this.particleTexture && obj.material.map !== this.digitParticleTexture) {
+          obj.material.map.dispose();
+        }
         obj.material.dispose();
       }
       this.digitGroup.remove(obj);
     }
     this.digitParticleData = [];
 
-    const w = 920;
-    const h = 260;
-    let fontSize = 130;
-    if (text.length >= 6) fontSize = 110;
-    if (text.length > 8) fontSize = 90;
-    if (text.length > 12) fontSize = 72;
+    // 高清点阵离线画布：大幅拓展分辨率，字形饱满雄浑、气势磅礴
+    const w = 1600;
+    const h = 360;
+    let fontSize = 175;
+    if (text.length >= 6) fontSize = 155;
+    if (text.length >= 8) fontSize = 136;
+    if (text.length >= 11) fontSize = 115;
+    if (text.length >= 14) fontSize = 95;
     const fontY = h / 2;
 
-    // 采样 3D 纯粒子点阵 (纯粒子特效，清爽通透，不暴光)
     const offCanvas = document.createElement('canvas');
     const offCtx = offCanvas.getContext('2d');
     offCanvas.width = w;
@@ -396,26 +449,31 @@ class MilestoneCelebrationEngine {
 
     offCtx.fillStyle = '#000000';
     offCtx.fillRect(0, 0, w, h);
-    offCtx.font = `900 ${fontSize}px "Impact", "Arial Black", -apple-system, sans-serif`;
+    // 优先采用笔画极度浑厚、开孔通透开阔的 Arial Black 与 Montserrat，确保 0, 4, 8, $, 逗号极其清晰
+    offCtx.font = `900 ${fontSize}px "Arial Black", "Montserrat", "Impact", -apple-system, sans-serif`;
     offCtx.textAlign = 'center';
     offCtx.textBaseline = 'middle';
+
+    // 渲染文字 (纯正粗黑体，字面饱满清晰，笔画分明)
     offCtx.fillStyle = '#ffffff';
     offCtx.fillText(text, w / 2, fontY);
 
     const imgData = offCtx.getImageData(0, 0, w, h);
     const data = imgData.data;
-    // 纯粒子采样步长：密度适中，既饱满连贯又具有清晰点阵星芒感
-    const step = text.length >= 6 ? 2.8 : 2.5;
+
+    // 纯粒子晶格采样：步长 2.3，颗粒分明且边缘清晰，纯正纯粒子特效质感
+    const step = 2.3;
+    const scaleFactor = 0.88;
 
     const pointsList = [];
     for (let y = 0; y < h; y += step) {
       for (let x = 0; x < w; x += step) {
         const idx = (Math.floor(y) * w + Math.floor(x)) * 4;
-        if (data[idx] > 110) {
-          // 目标 3D 坐标 (tx, ty, tz)
-          const tx = (x - w / 2) * 1.05;
-          const ty = -(y - h / 2) * 1.05 + 40; // 居中偏上，与下方 Aosom 2026 留出优雅空间
-          const tz = (Math.random() - 0.5) * 16;
+        if (data[idx] > 80) {
+          // 目标 3D 坐标：微幅 Z 轴散布 (±0.9)，消除失焦与视差模糊，字迹刀锋般锐利
+          const tx = (x - w / 2) * scaleFactor;
+          const ty = -(y - h / 2) * scaleFactor + 45;
+          const tz = (Math.random() - 0.5) * 1.8;
 
           // 初始凝聚位置：从三维星系深空各角度飞入
           const angle = Math.random() * Math.PI * 2;
@@ -434,7 +492,6 @@ class MilestoneCelebrationEngine {
             vx: 0,
             vy: 0,
             vz: 0,
-            jitterOffset: Math.random() * Math.PI * 2,
             isDispersing: false
           });
         }
@@ -451,19 +508,37 @@ class MilestoneCelebrationEngine {
       positions[i * 3 + 1] = pointsList[i].y;
       positions[i * 3 + 2] = pointsList[i].z;
 
-      // 纯粒子高明度、璀璨亮眼金光/冰钻色系（明显、耀眼、纯粒子星光感）
-      if (tier === '10k') {
+      // 纯粒子高反差星钻色彩配比 (白芯彩晕，轮廓清晰鲜明、通透突出)
+      if (tier === '10k' || tier === 'live') {
         const r = Math.random();
-        if (r < 0.40) colorV.setHex(0x38bdf8); // 明净电光冰蓝
-        else if (r < 0.75) colorV.setHex(0x7dd3fc); // 澄澈亮天蓝
-        else if (r < 0.93) colorV.setHex(0xffffff); // 纯净高光钻石白
-        else colorV.setHex(0xbae6fd); // 水晶辉光
+        if (r < 0.45) {
+          // 45% 钻石白高亮晶核 (骨骼清晰立体、突出醒目)
+          colorV.setRGB(1.35, 1.35, 1.35);
+        } else if (r < 0.73) {
+          // 28% 澄澈冰钻亮青蓝 (星钻剔透质感)
+          colorV.setRGB(0.70, 1.25, 1.75);
+        } else if (r < 0.93) {
+          // 20% 霓虹赛博电光蓝 (丰富层次与立体粒子感)
+          colorV.setRGB(0.35, 1.05, 1.90);
+        } else {
+          // 7% 水晶高光微芒
+          colorV.setRGB(0.25, 0.85, 1.75);
+        }
       } else {
         const r = Math.random();
-        if (r < 0.40) colorV.setHex(0xfde047); // 明艳耀眼灿金 (高明度核心)
-        else if (r < 0.70) colorV.setHex(0xfef08a); // 晨曦光芒金白 (极大提升亮度)
-        else if (r < 0.88) colorV.setHex(0xffffff); // 纯真星芒白金闪烁 (璀璨剔透)
-        else colorV.setHex(0xfbbf24); // 纯正暖金光晕
+        if (r < 0.45) {
+          // 45% 纯白钻石高亮晶核
+          colorV.setRGB(1.35, 1.35, 1.35);
+        } else if (r < 0.73) {
+          // 28% 晨曦晨光金
+          colorV.setRGB(1.50, 1.40, 0.65);
+        } else if (r < 0.93) {
+          // 20% 璀璨明艳真金
+          colorV.setRGB(1.60, 1.15, 0.25);
+        } else {
+          // 7% 暖金流光微晕
+          colorV.setRGB(1.40, 0.80, 0.15);
+        }
       }
 
       colors[i * 3 + 0] = colorV.r;
@@ -476,8 +551,8 @@ class MilestoneCelebrationEngine {
     geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
 
     const material = new THREE.PointsMaterial({
-      size: tier === '10k' ? 5.2 : 5.8, // 饱满显眼的粒子直径，璀璨夺目
-      map: this.getOrCreateParticleTexture(),
+      size: 5.4, // 精确适中的粒子直径，呈现极致璀璨且清晰可辨的纯粒子星钻点阵
+      map: this.getOrCreateDigitParticleTexture(),
       vertexColors: true,
       blending: THREE.AdditiveBlending,
       transparent: true,
@@ -628,6 +703,7 @@ class MilestoneCelebrationEngine {
     // 重置 3D 摄像机与冲击波
     this.camera.position.set(0, 0, 720);
     this.digitGroup.rotation.set(0, 0, 0);
+    this.digitGroup.position.set(0, 0, 0);
     this.digitGroup.scale.set(1, 1, 1);
     if (this.shockwaveMesh) {
       this.shockwaveMesh.scale.set(0.1, 0.1, 1);
@@ -977,7 +1053,7 @@ class MilestoneCelebrationEngine {
       this.camera.position.z = 700 - Math.sin(spinProgress * Math.PI) * 90;
       scaleVal = 1.0 + Math.sin(spinProgress * Math.PI) * 0.18;
     } else {
-      // 【阶段 3 & 4】：定格与微幅呼吸悬浮
+      // 【阶段 3 & 4】：定格与微幅宏伟呼吸悬浮
       spinAngleY = 0;
       spinAngleX = 0;
       scaleVal = 1.0;
@@ -989,36 +1065,42 @@ class MilestoneCelebrationEngine {
     this.digitGroup.rotation.x = spinAngleX;
     this.digitGroup.scale.set(scaleVal, scaleVal, scaleVal);
 
+    // 阶段 3 & 4：整组数字平滑悬浮呼吸，保证单个粒子坐标 100% 锁死定格，无任何独立抖动模糊与毛刺
+    if (t >= 2.5) {
+      this.digitGroup.position.y = Math.sin((t - 2.5) * 1.5) * 5;
+      this.digitGroup.position.x = Math.cos((t - 2.5) * 1.1) * 2.5;
+    } else {
+      this.digitGroup.position.y = 0;
+      this.digitGroup.position.x = 0;
+    }
+
     for (let i = 0; i < count; i++) {
       const p = this.digitParticleData[i];
 
       if (!p.isDispersing) {
-        // 弹簧阻尼飞入
+        // 弹簧阻尼飞入与吸附
         const dx = p.tx - p.x;
         const dy = p.ty - p.y;
         const dz = p.tz - p.z;
 
-        p.vx += dx * 0.088;
-        p.vy += dy * 0.088;
-        p.vz += dz * 0.088;
+        p.vx += dx * 0.095;
+        p.vy += dy * 0.095;
+        p.vz += dz * 0.095;
 
-        p.vx *= 0.81;
-        p.vy *= 0.81;
-        p.vz *= 0.81;
+        p.vx *= 0.78;
+        p.vy *= 0.78;
+        p.vz *= 0.78;
 
         p.x += p.vx;
         p.y += p.vy;
         p.z += p.vz;
 
-        // 微幅呼吸
-        const jitterX = Math.sin(t * 3.5 + p.jitterOffset) * 1.5;
-        const jitterY = Math.cos(t * 2.8 + p.jitterOffset) * 1.5;
-
-        positions[i * 3 + 0] = p.x + jitterX;
-        positions[i * 3 + 1] = p.y + jitterY;
+        // 彻底移除独立随机抖动，每个粒子精确定位在目标晶格上，字迹刀锋般锐利、清晰突出
+        positions[i * 3 + 0] = p.x;
+        positions[i * 3 + 1] = p.y;
         positions[i * 3 + 2] = p.z;
       } else {
-        // 爆散
+        // 退出时的全空间爆散
         p.x += p.vx;
         p.y += p.vy;
         p.z += p.vz;
