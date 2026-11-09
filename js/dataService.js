@@ -3,37 +3,38 @@
  * 
  * 对接接口：https://amsbff.admindev.aosom.com/platform/oms/saleOrderBoard/statistics
  * 请求参数：
- * - storeIds: '2,12' (支持逗号分隔多店铺)
  * - payTimeBegin: '2026-10-20 00:00:00' (支付起始时间)
  * - payTimeEnd: '2026-10-30 00:00:00' (支付截止时间)
+ * (已按要求移除 storeIds 参数，接口默认拉取全部店铺)
  * 
  * 返回字段规范：
  * - storeId: 店铺编号
  * - storeName: 店铺名称 (如 "AMB店铺002", "泛欧数据迁移店铺不要动")
  * - storeType: "1" (品牌站) | "2" (泛欧站)
  * - markets: [ { marketId, marketName, orderCount, orderAmount, conversionRate } ]
+ *   注：后端 orderAmount 单位为分 (如 1360 代表 13.60 USD)，前端统一除以 100 进行换算
  * 
  * 前端核心自动计算：
  * - 全店铺总营收 (USD)、全店铺总订单量
  * - 全店铺平均客单价 (AOV = 销售额 / 订单量)
  * - 全店铺综合转化率 (按各市场订单量加权合并)
  * - 业务线划分 (全站 / 品牌站 / 泛欧站)
- * - 10秒定时静默增量轮询
+ * - 30秒定时静默增量轮询
  */
 
 class DataService {
   constructor() {
-    this.pollInterval = 10; // 10秒轮询
+    this.pollInterval = 30; // 30秒轮询
     this.timer = null;
     this.subscribers = [];
 
     // 真实后端接口基础配置
     this.apiBaseUrl = 'https://amsbff.admindev.aosom.com/platform/oms/saleOrderBoard/statistics';
-    this.storeIds = '2,12';
 
-    // 默认大促周期时间范围 (2026-10-20 00:00:00 至 2026-10-30 00:00:00)
-    this.payTimeBegin = '2026-10-20 00:00:00';
-    this.payTimeEnd = '2026-10-30 00:00:00';
+    // 默认今日实时时间范围 (UTC 今日 00:00:00 至次日 00:00:00)
+    const todayRange = this.getTodayTimeRange();
+    this.payTimeBegin = todayRange.payTimeBegin;
+    this.payTimeEnd = todayRange.payTimeEnd;
 
     this.isUsingRealApi = true;
     this.lastFetchTime = null;
@@ -57,33 +58,31 @@ class DataService {
   }
 
   /**
-   * 生成大促默认时间范围 (基于 UTC)：
-   * 截止时间：次日 00:00:00 (如 2026-10-30 00:00:00 UTC)
-   * 起始时间：向前推 10 天 00:00:00 (如 2026-10-20 00:00:00 UTC)
+   * 生成今日实时时间范围 (严格基于 UTC)：
+   * 起始时间：今日 00:00:00 UTC
+   * 截止时间：次日 00:00:00 UTC
    */
-  getDefaultTimeRange() {
+  getTodayTimeRange() {
     const now = new Date();
+    const begin = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 0, 0, 0));
     const end = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 1, 0, 0, 0));
-    const begin = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() - 9, 0, 0, 0));
     return {
       payTimeBegin: this.formatUtcDateTime(begin),
       payTimeEnd: this.formatUtcDateTime(end)
     };
   }
 
+  getDefaultTimeRange() {
+    return this.getTodayTimeRange();
+  }
+
   /**
-   * 切换快捷预设时间周期 (严格按 UTC 维度统计)
-   * @param {'campaign' | 'today' | '7d' | '30d'} preset
+   * 切换快捷预设时间周期 (严格按 UTC 维度统计，默认今日实时)
+   * @param {'today' | '7d' | '30d'} preset
    */
-  setTimePreset(preset = 'campaign') {
+  setTimePreset(preset = 'today') {
     const now = new Date();
-    if (preset === 'today') {
-      // UTC 今日 00:00:00 至次日 00:00:00
-      const begin = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 0, 0, 0));
-      const end = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 1, 0, 0, 0));
-      this.payTimeBegin = this.formatUtcDateTime(begin);
-      this.payTimeEnd = this.formatUtcDateTime(end);
-    } else if (preset === '7d') {
+    if (preset === '7d') {
       // UTC 近 7 天
       const begin = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() - 6, 0, 0, 0));
       const end = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 1, 0, 0, 0));
@@ -96,9 +95,10 @@ class DataService {
       this.payTimeBegin = this.formatUtcDateTime(begin);
       this.payTimeEnd = this.formatUtcDateTime(end);
     } else {
-      // 默认大促周期 (2026-10-20 ~ 2026-10-30 UTC)
-      this.payTimeBegin = '2026-10-20 00:00:00';
-      this.payTimeEnd = '2026-10-30 00:00:00';
+      // 默认今日 (UTC 今日 00:00:00 至次日 00:00:00)
+      const range = this.getTodayTimeRange();
+      this.payTimeBegin = range.payTimeBegin;
+      this.payTimeEnd = range.payTimeEnd;
     }
     return this.fetchRealData();
   }
@@ -113,20 +113,12 @@ class DataService {
   }
 
   /**
-   * 设置店铺 IDs 列表并重新请求
-   */
-  setStoreIds(storeIds) {
-    if (storeIds) this.storeIds = String(storeIds).trim();
-    return this.fetchRealData();
-  }
-
-  /**
    * 发起真实后端接口请求
    */
   async fetchRealData() {
     try {
       const url = new URL(this.apiBaseUrl);
-      url.searchParams.set('storeIds', this.storeIds);
+      // 已按要求移除 storeIds 参数，接口默认拉取全部店铺
       url.searchParams.set('payTimeBegin', this.payTimeBegin);
       url.searchParams.set('payTimeEnd', this.payTimeEnd);
 
@@ -174,8 +166,9 @@ class DataService {
       const category = isBrand ? '品牌站' : '泛欧站';
 
       const markets = (store.markets || []).map(m => {
-        // 兼容字符串金额 (如 "128167") 或数字金额
-        const sales = parseFloat(m.orderAmount !== undefined ? m.orderAmount : (m.sales || 0)) || 0;
+        // 兼容字符串金额或数字金额，后端返回的 orderAmount 单位为分 (如 1360 代表 13.60 USD)，前端统一除以 100 换算为标准 USD 金额
+        const rawAmount = m.orderAmount !== undefined ? m.orderAmount : (m.sales !== undefined ? m.sales : 0);
+        const sales = (parseFloat(rawAmount) || 0) / 100;
         const orders = parseInt(m.orderCount !== undefined ? m.orderCount : (m.orders || 0), 10) || 0;
         // 转化率 (若后端提供 0 则展示 0，若提供实际转化率则展示)
         const convRate = Number(
@@ -294,7 +287,6 @@ class DataService {
       isRealApi: this.isUsingRealApi,
       apiInfo: {
         endpoint: this.apiBaseUrl,
-        storeIds: this.storeIds,
         payTimeBegin: this.payTimeBegin,
         payTimeEnd: this.payTimeEnd,
         lastFetchTime: this.lastFetchTime,
@@ -378,7 +370,7 @@ class DataService {
   }
 
   /**
-   * 启动 10 秒定时后台静默轮询
+   * 启动 30 秒定时后台静默轮询
    */
   startPolling() {
     if (this.timer) clearInterval(this.timer);
@@ -386,7 +378,7 @@ class DataService {
     // 页面加载后立即发起一次真实后端请求
     this.fetchRealData();
 
-    // 每 10 秒轮询一次
+    // 每 30 秒轮询一次
     this.timer = setInterval(() => {
       this.fetchRealData();
     }, this.pollInterval * 1000);

@@ -176,8 +176,13 @@ class DashboardCharts {
       };
     });
 
-    const maxSales = Math.max(...data.stores.map(s => s.storeSales));
-    const yMax = Math.ceil((maxSales * 1.25) / 100000) * 100000;
+    const maxSales = Math.max(...data.stores.map(s => s.storeSales), 0);
+    let yStep = 100000;
+    if (maxSales < 100) yStep = 20;
+    else if (maxSales < 1000) yStep = 200;
+    else if (maxSales < 10000) yStep = 2000;
+    else if (maxSales < 100000) yStep = 20000;
+    const yMax = Math.ceil((maxSales * 1.25) / yStep) * yStep || 100;
 
     const option = {
       backgroundColor: 'transparent',
@@ -198,7 +203,7 @@ class DashboardCharts {
             <div style="font-weight:bold;margin-bottom:6px;color:${cfg.tooltipTitle};border-bottom:1px solid rgba(255,255,255,0.15);padding-bottom:4px;">
               [${catLabel}] ${st.storeName}
             </div>
-            <div style="margin:4px 0;">${t('chartTooltipRevenue')}: <b style="color:#ffffff;">$ ${Number(st.storeSales).toLocaleString()}</b></div>
+            <div style="margin:4px 0;">${t('chartTooltipRevenue')}: <b style="color:#ffffff;">$ ${Number(st.storeSales).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</b></div>
             <div style="margin:4px 0;">${t('chartTooltipOrders')}: <b style="color:#93c5fd;">${st.storeOrders.toLocaleString()} ${t('ordersCountText')}</b></div>
             <div style="margin:4px 0;">${t('chartTooltipMarkets')}: <b>${st.marketCount} ${t('marketsSuffix')}</b></div>
             <div style="margin:4px 0;">${t('chartTooltipAov')}: <b>$ ${st.storeAov.toFixed(2)}</b></div>
@@ -245,7 +250,10 @@ class DashboardCharts {
             show: true,
             position: 'top',
             distance: 8,
-            formatter: params => `$${Math.round(params.value).toLocaleString()}`,
+            formatter: params => {
+              const val = Number(params.value || 0);
+              return `$${val >= 1000 ? Math.round(val).toLocaleString('en-US') : val.toFixed(2)}`;
+            },
             backgroundColor: cfg.barLabelBg,
             borderColor: cfg.barLabelBorder,
             borderWidth: 1,
@@ -309,7 +317,7 @@ class DashboardCharts {
         formatter: params => {
           const item = params[0];
           const tRev = window.i18n ? window.i18n.t('chartTooltipRevenue') : '总营收';
-          return `<b>${item.name}</b><br/>${tRev}: <b style="color:#fbbf24;">$ ${Number(item.value).toLocaleString()}</b>`;
+          return `<b>${item.name}</b><br/>${tRev}: <b style="color:#fbbf24;">$ ${Number(item.value).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</b>`;
         }
       },
       grid: { top: 15, left: 180, right: 90, bottom: 20 },
@@ -341,7 +349,10 @@ class DashboardCharts {
             fontWeight: 'bold',
             fontSize: 12,
             fontFamily: 'DIN Alternate, monospace',
-            formatter: params => `$${Math.round(params.value).toLocaleString()}`
+            formatter: params => {
+              const val = Number(params.value || 0);
+              return `$${val >= 1000 ? Math.round(val).toLocaleString('en-US') : val.toFixed(2)}`;
+            }
           }
         }
       ]

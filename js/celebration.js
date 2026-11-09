@@ -18,12 +18,12 @@
 // ==========================================================
 // 里程碑突破特效配置 (用户可随时在此处或控制台快速修改)
 // ==========================================================
-// 里程碑突破阶梯规则：5000 -> 10000 -> 此后每加 1w (10000) 播放一次
+// 里程碑突破阶梯规则：1w -> 2w -> 此后每加 1w (10000) 播放一次 (移除 5000 阈值)
 // 会话级控制：首次进入达成的最高档位(如5w)仅播放一次5w，后续每迈过新的一万档播放一次
 // ==========================================================
 window.MILESTONE_CONFIG = {
   // 规则描述
-  rule: '5k/10k/step_1w',
+  rule: 'step_1w',
   sessionOnce: true
 };
 
@@ -75,13 +75,13 @@ class MilestoneCelebrationEngine {
     // 剧情状态机
     this.startTime = 0;
     this.currentTime = 0;
-    this.currentTier = '5k';
+    this.currentTier = '10k';
     this.currentMilestone = null;
     this.autoCloseTimer = null;
     this.hasRevealedTitle = false;
 
     // 滚动数字状态
-    this.rollTargetValue = 5000;
+    this.rollTargetValue = 10000;
     this.rollCurrentValue = 0;
 
     // 里程碑触发历史
@@ -185,10 +185,10 @@ class MilestoneCelebrationEngine {
         this.close();
       } else if ((e.key === 'm' || e.key === 'M') && !this.isActive) {
         this.launchTier('live');
-      } else if (e.key === '5' && !this.isActive) {
-        window.triggerMilestoneFx(5000);
       } else if (e.key === '1' && !this.isActive) {
         window.triggerMilestoneFx(10000);
+      } else if (e.key === '2' && !this.isActive) {
+        window.triggerMilestoneFx(20000);
       }
     });
   }
@@ -1243,15 +1243,13 @@ class MilestoneCelebrationEngine {
 
   /**
    * 阶梯阈值计算：
-   * 1. 5000 播放一次
-   * 2. 10000 播放一次
-   * 3. 此后每加 1w (10000) 播放一次 (2w, 3w, 4w, 5w, ...)
+   * 1. 阈值从 1w (10,000) 起步，低于 1w 不播放动画 (彻底移除 5,000 阈值)
+   * 2. 达到或突破 1w、2w、3w、4w、5w 等 (每加 1w 播放一次)
    * 若店铺首次进入金额就是 5w (50,000)，则计算出的最高达成里程碑就是 50000，只播放一次 5w 的动画！
    */
   calculateHighestMilestone(val) {
     const num = Math.floor(Number(val) || 0);
-    if (num < 5000) return 0;
-    if (num < 10000) return 5000;
+    if (num < 10000) return 0;
     return Math.floor(num / 10000) * 10000;
   }
 
@@ -1302,7 +1300,7 @@ class MilestoneCelebrationEngine {
     const milestoneStr = '$' + milestoneNum.toLocaleString('en-US');
     const salesNum = Number(sales);
     const salesStr = '$' + salesNum.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    const tier = milestoneNum >= 10000 ? '10k' : '5k';
+    const tier = '10k';
 
     this.launch({
       tier,

@@ -80,14 +80,14 @@ class DashboardController {
         }
       });
     });
-    // 时间周期预设切换 (黑五大促 / 今日 / 近7天 / 近30天)
+    // 时间周期预设切换 (今日 / 近7天 / 近30天)
     const presetPills = document.querySelectorAll('.preset-pill');
     presetPills.forEach(pill => {
       pill.addEventListener('click', e => {
         const target = e.currentTarget;
         presetPills.forEach(p => p.classList.remove('active'));
         target.classList.add('active');
-        const preset = target.dataset.preset;
+        const preset = target.dataset.preset || 'today';
         if (window.dataService) {
           window.dataService.setTimePreset(preset);
         }
@@ -204,10 +204,15 @@ class DashboardController {
    * 2. 中部图表顶部辅助指标
    */
   renderLiveMomentumMetrics(data) {
+    const formatAmount = val => {
+      const n = Number(val || 0);
+      return n >= 1000 ? Math.round(n).toLocaleString('en-US') : n.toFixed(2);
+    };
+
     // 累积总营收
     const accumRevEl = document.getElementById('accumulatedRevenueVal');
     if (accumRevEl) {
-      accumRevEl.innerText = `$${Math.round(data.amsTotalSales || 0).toLocaleString('en-US')}`;
+      accumRevEl.innerText = `$${formatAmount(data.amsTotalSales)}`;
     }
 
     // 最高收入店铺
@@ -217,13 +222,13 @@ class DashboardController {
       leadingStoreNameEl.innerText = data.leadingStore.storeName;
     }
     if (leadingStoreRevEl && data.leadingStore) {
-      leadingStoreRevEl.innerText = `$${Math.round(data.leadingStore.sales).toLocaleString('en-US')} USD`;
+      leadingStoreRevEl.innerText = `$${formatAmount(data.leadingStore.sales)} USD`;
     }
 
     // 最近一小时预估营收
     const runRateEl = document.getElementById('hourlyRunRateVal');
     if (runRateEl) {
-      runRateEl.innerText = `$${Number(data.hourlyRunRate || 0).toLocaleString('en-US')} / hr`;
+      runRateEl.innerText = `$${formatAmount(data.hourlyRunRate)} / hr`;
     }
   }
 
