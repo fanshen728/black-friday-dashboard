@@ -129,8 +129,8 @@ class DashboardController {
     // 5. 底部业务线与市场情报表格
     this.renderIntelligenceTable(data, this.activeBusinessLine);
 
-    // 6. 里程碑门槛检测 (自动触发突破烟花粒子大招)
-    if (window.celebrationEngine) {
+    // 6. 里程碑门槛检测 (严格限定仅真实后端接口且有效数据才触发)
+    if (window.celebrationEngine && data && data.isRealApi) {
       window.celebrationEngine.checkMilestones(data);
     }
   }
@@ -138,9 +138,11 @@ class DashboardController {
   renderApiStatusAndTime(data) {
     const timeRangeEl = document.getElementById('currentTimeRangeText');
     if (timeRangeEl && data.apiInfo) {
-      const bDate = data.apiInfo.payTimeBegin ? data.apiInfo.payTimeBegin.split(' ')[0] : '2026-10-20';
-      const eDate = data.apiInfo.payTimeEnd ? data.apiInfo.payTimeEnd.split(' ')[0] : '2026-10-30';
-      timeRangeEl.innerText = `${bDate} ~ ${eDate}`;
+      const bDate = data.apiInfo.payTimeBegin ? data.apiInfo.payTimeBegin.split(' ')[0] : '';
+      const eDate = data.apiInfo.payTimeEnd ? data.apiInfo.payTimeEnd.split(' ')[0] : '';
+      if (bDate && eDate) {
+        timeRangeEl.innerText = `${bDate} ~ ${eDate}`;
+      }
     }
 
     const badgeEl = document.getElementById('apiStatusBadge');

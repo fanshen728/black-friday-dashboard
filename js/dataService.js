@@ -36,12 +36,12 @@ class DataService {
     this.payTimeBegin = todayRange.payTimeBegin;
     this.payTimeEnd = todayRange.payTimeEnd;
 
-    this.isUsingRealApi = true;
+    this.isUsingRealApi = false;
     this.lastFetchTime = null;
     this.lastFetchError = null;
     this.currentData = null;
 
-    // 本地安全备用数据 (防止网络不可用时页面出现白屏)
+    // 初始安全空数据 (防止接口未响应前出现 NaN，初始销售额为 0，绝对不使用带金额的假数据)
     this.initFallbackStores();
   }
 
@@ -140,6 +140,7 @@ class DataService {
         this.lastFetchError = null;
         this.lastFetchTime = new Date();
         this.currentData = this.calculateAggregates(this.rawStores);
+        this.currentData.isRealApi = true;
         this.notify();
         return this.currentData;
       } else {
@@ -148,9 +149,13 @@ class DataService {
     } catch (err) {
       console.warn('[DataService] 真实接口拉取失败，启用平滑保持与容灾兜底:', err);
       this.lastFetchError = err.message;
+      this.isUsingRealApi = false;
       if (!this.currentData) {
         this.initFallbackStores();
+      } else {
+        this.currentData.isRealApi = false;
       }
+      this.notify();
       return this.currentData;
     }
   }
@@ -320,31 +325,13 @@ class DataService {
   }
 
   /**
-   * 容灾兜底基础数据
+   * 容灾兜底基础数据 (初始为空结构，金额与订单均为 0，杜绝假数据触发里程碑动画或数值跳变)
    */
   initFallbackStores() {
-    this.rawStores = [
-      {
-        storeId: 2,
-        storeName: 'AMB店铺002',
-        storeType: '1',
-        markets: [
-          { marketId: 3, marketName: 'DE德国', orderCount: 5, orderAmount: 128167, conversionRate: 0 }
-        ]
-      },
-      {
-        storeId: 12,
-        storeName: '泛欧数据迁移店铺不要动',
-        storeType: '2',
-        markets: [
-          { marketId: 47, marketName: 'FI 芬兰', orderCount: 30, orderAmount: 533338, conversionRate: 0 },
-          { marketId: 33, marketName: 'GR 希腊', orderCount: 57, orderAmount: 787537, conversionRate: 0 },
-          { marketId: 37, marketName: 'BG 保加利亚', orderCount: 1, orderAmount: 3648, conversionRate: 0 }
-        ]
-      }
-    ];
-
+    this.isUsingRealApi = false;
+    this.rawStores = [];
     this.currentData = this.calculateAggregates(this.rawStores);
+    this.currentData.isRealApi = false;
   }
 
   /**
@@ -353,7 +340,8 @@ class DataService {
   onData(callback) {
     if (typeof callback === 'function') {
       this.subscribers.push(callback);
-      if (this.currentData) {
+      // 仅当已有真实后端数据时才触发首次同步，未就绪时不提前派发假数据
+      if (this.currentData && this.isUsingRealApi) {
         callback(this.currentData);
       }
     }

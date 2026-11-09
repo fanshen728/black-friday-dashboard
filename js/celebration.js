@@ -1255,13 +1255,15 @@ class MilestoneCelebrationEngine {
 
   /**
    * 自动数据阈值监听：
+   * - 严格限制：仅在后端接口真实返回数据 (isRealApi === true) 且有效时才触发；
    * - 在本次会话中，初次加载计算出当前最高达成里程碑 (例如 5w)，仅播放这一个最高里程碑；
    * - 播放后记录到会话 (sessionStorage)；
    * - 后续轮询时，只有当金额再次突破新的 1w 台阶 (例如由 5w 涨到 6w) 时，才会再次播放对应的新里程碑；
    * - 若金额未跨过新的一万档，则绝不重复播放，除非新开会话。
    */
   checkMilestones(data) {
-    if (!data) return;
+    // 严禁在非真实接口数据、离线状态或数据不完整时触发突破特效
+    if (!data || !data.isRealApi) return;
     const sales = Number(data.amsTotalSales || 0);
     const targetMilestone = this.calculateHighestMilestone(sales);
     if (targetMilestone <= 0) return;
@@ -1275,6 +1277,14 @@ class MilestoneCelebrationEngine {
       }
     } catch (e) {
       lastCelebrated = this.lastProcessedMilestone || 0;
+    }
+
+    // 智能自愈修正：如果当前真实总金额远低于记录的档位（例如之前被本地测试数据或假数据污染），自动清空无效记录
+    if (sales < lastCelebrated) {
+      lastCelebrated = 0;
+      try {
+        sessionStorage.removeItem(sessionKey);
+      } catch (e) {}
     }
 
     // 只有当达成的最高里程碑严格大于上次已播放过的里程碑时才触发
@@ -1307,7 +1317,7 @@ class MilestoneCelebrationEngine {
       targetNum: milestoneNum,
       amount: milestoneStr,
       title: isEn ? `AMS 2026 TOTAL REVENUE SURPASSED ${milestoneStr} USD!` : `AMS 2026 全店铺总销售额突破 ${milestoneStr} 美元！`,
-      subtitle: isEn ? `Global Ops Real-Time Record · Current Total: ${salesStr} USD` : `全球电商黑五作战中心实时战报 · 当前总营收 ${salesStr} USD`,
+      subtitle: isEn ? `Global Ops Real-Time Record · Current Total: ${salesStr} USD` : `全球电商作战中心实时战报 · 当前总营收 ${salesStr} USD`,
       stats: data
     });
   }
