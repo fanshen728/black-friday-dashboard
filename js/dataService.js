@@ -1,7 +1,7 @@
 /**
  * AMS 销售看板 - 真实数据服务层 (后端接口深度对接)
  * 
- * 对接接口：https://amsbff.admindev.aosom.com/platform/oms/saleOrderBoard/statistics
+ * 对接接口：https://amsbff.admin.aosom.com/platform/oms/saleOrderBoard/statistics
  * 请求参数：
  * - payTimeBegin: '2026-10-20 00:00:00' (支付起始时间)
  * - payTimeEnd: '2026-10-30 00:00:00' (支付截止时间)
@@ -29,7 +29,7 @@ class DataService {
     this.subscribers = [];
 
     // 真实后端接口基础配置
-    this.apiBaseUrl = 'https://amsbff.admindev.aosom.com/platform/oms/saleOrderBoard/statistics';
+    this.apiBaseUrl = 'https://amsbff.admin.aosom.com/platform/oms/saleOrderBoard/statistics';
 
     // 默认今日实时时间范围 (UTC 今日 00:00:00 至次日 00:00:00)
     const todayRange = this.getTodayTimeRange();
@@ -188,7 +188,7 @@ class DataService {
         const meta = (window.COUNTRY_MARKETS && window.COUNTRY_MARKETS[code]) || {};
 
         return {
-          marketId: m.marketId,
+          marketId: m.marketId, 
           marketCode: code,
           marketName: m.marketName || code,
           flag: meta.flag || '🌐',
